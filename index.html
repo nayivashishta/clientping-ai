@@ -7,13 +7,20 @@
 
   <h1>🚀 ClientPing AI</h1>
 
-  <h2>Signup</h2>
-  <input id="email" placeholder="Enter Email"><br><br>
-  <input id="password" type="password" placeholder="Enter Password"><br><br>
-  <button onclick="signup()">Signup</button>
+  <div id="auth">
+    <h2>Signup</h2>
+    <input id="email" placeholder="Enter Email"><br><br>
+    <input id="password" type="password" placeholder="Enter Password"><br><br>
+    <button onclick="signup()">Signup</button>
 
-  <h2>Login</h2>
-  <button onclick="login()">Login</button>
+    <h2>Login</h2>
+    <button onclick="login()">Login</button>
+  </div>
+
+  <div id="dashboard" style="display:none;">
+    <h2>Welcome to Dashboard 😍</h2>
+    <p>Your app is working!</p>
+  </div>
 
   <p id="status"></p>
 
@@ -53,6 +60,10 @@
       signInWithEmailAndPassword(auth, email, password)
         .then(() => {
           document.getElementById("status").innerText = "Login Successful 😎";
+
+          // 🔥 Yaha magic ho raha hai
+          document.getElementById("auth").style.display = "none";
+          document.getElementById("dashboard").style.display = "block";
         })
         .catch((error) => {
           document.getElementById("status").innerText = error.message;

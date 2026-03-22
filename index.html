@@ -8,14 +8,41 @@
   <h1>🚀 ClientPing AI</h1>
 
   <h2>Login</h2>
-  <input placeholder="Enter Email"><br><br>
-  <input placeholder="Enter Password" type="password"><br><br>
-  <button>Login</button>
+  <input id="email" placeholder="Enter Email"><br><br>
+  <input id="password" type="password" placeholder="Enter Password"><br><br>
+  <button onclick="login()">Login</button>
 
-  <hr>
+  <p id="status"></p>
 
-  <h2>Dashboard</h2>
-  <p>No clients yet...</p>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA9gNoGmnrUF8GVi_4SxtTGJZUJNK3_iFg",
+      authDomain: "client-ping-ai.firebaseapp.com",
+      projectId: "client-ping-ai",
+      storageBucket: "client-ping-ai.firebasestorage.app",
+      messagingSenderId: "150192483890",
+      appId: "1:150192483890:web:1f1251a6b799f68c12962b"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    window.login = function() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          document.getElementById("status").innerText = "Login Successful 😍";
+        })
+        .catch((error) => {
+          document.getElementById("status").innerText = error.message;
+        });
+    }
+  </script>
 
 </body>
 </html>

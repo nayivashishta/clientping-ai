@@ -73,3 +73,16 @@
 
 </body>
 </html>
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+const auth = getAuth(app);
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // User login hai
+    document.getElementById("auth").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+  } else {
+    // User login nahi hai
+    document.getElementById("auth").style.display = "block";
+    document.getElementById("dashboard").style.display = "none";
+  }
+});

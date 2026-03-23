@@ -25,6 +25,13 @@
   <p>Your app is working!</p>
   <button onclick="logout()">Logout</button>
 </div>
+  <h3>Add Client</h3>
+<input id="clientName" placeholder="Client Name"><br><br>
+<input id="clientContact" placeholder="Contact"><br><br>
+<button onclick="addClient()">Add Client</button>
+
+<h3>Your Clients</h3>
+<ul id="clientList"></ul>
 
 <p id="status"></p>
 
@@ -103,3 +110,32 @@ window.logout = function () {
 
 </body>
 </html>
+window.addClient = function () {
+  const name = document.getElementById("clientName").value;
+  const contact = document.getElementById("clientContact").value;
+
+  const client = { name, contact };
+
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+  clients.push(client);
+
+  localStorage.setItem("clients", JSON.stringify(clients));
+
+  loadClients();
+};
+
+function loadClients() {
+  const list = document.getElementById("clientList");
+  list.innerHTML = "";
+
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+  clients.forEach(c => {
+    const li = document.createElement("li");
+    li.innerText = c.name + " - " + c.contact;
+    list.appendChild(li);
+  });
+}
+
+// Page load pe clients show
+loadClients();

@@ -76,9 +76,13 @@
   <input id="reminderTime" type="datetime-local">
 
   <button onclick="addClient()">Add Client</button>
-
+    lastContact: new Date().toISOString(),
+    followedUp: false
+  clients.push({ name, contact, reminder, lastContact: new Date().toISOString(), followedUp: false });
+  
   <h3>Your Clients</h3>
   <ul id="clientList"></ul>
+  <button onclick="sendWhatsApp()">Send WhatsApp Message</button>
 
   <button onclick="generateMessage()">Generate AI Message</button>
   <p id="aiMessage"></p>
@@ -222,6 +226,24 @@ window.generateMessage = function () {
 
   document.getElementById("aiMessage").innerText =
     `Hi ${client.name}, just checking in! Let me know if you need any help.`;
+};
+  window.sendWhatsApp = function () {
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+  if (clients.length === 0) {
+    alert("No clients found");
+    return;
+  }
+
+  const client = clients[clients.length - 1];
+
+  const message = document.getElementById("aiMessage").innerText;
+
+  const phone = client.contact;
+
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+  window.open(url, "_blank");
 };
 function smartFollowUp() {
   let clients = JSON.parse(localStorage.getItem("clients")) || [];

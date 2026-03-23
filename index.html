@@ -223,7 +223,41 @@ window.generateMessage = function () {
   document.getElementById("aiMessage").innerText =
     `Hi ${client.name}, just checking in! Let me know if you need any help.`;
 };
+function smartFollowUp() {
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+  const now = new Date();
 
+  clients.forEach(c => {
+    if (!c.lastContact) {
+      c.lastContact = new Date().toISOString();
+    }
+
+    const last = new Date(c.lastContact);
+    const diffDays = (now - last) / (1000 * 60 * 60 * 24);
+
+    // 🔥 AI DECISION
+    if (diffDays >= 2 && !c.followedUp) {
+
+      let message = "";
+
+      if (diffDays > 5) {
+        message = `Hi ${c.name}, it's been a while! Just checking if you need any help 😊`;
+      } else {
+        message = `Hey ${c.name}, just following up on our last conversation.`;
+      }
+
+      alert("AI Follow-up: " + message);
+
+      c.followedUp = true;
+    }
+  });
+
+  localStorage.setItem("clients", JSON.stringify(clients));
+        }
+  setInterval(() => {
+  smartFollowUp();
+}, 10000);
+  
 // UPGRADE
 window.upgrade = function () {
   alert("Payment coming soon 😏");

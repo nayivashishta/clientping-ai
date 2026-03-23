@@ -26,6 +26,7 @@
   <button onclick="logout()">Logout</button>
 </div>
   <h3>Add Client</h3>
+  <input id="reminderTime" type="datetime-local"><br><br>
 <input id="clientName" placeholder="Client Name"><br><br>
 <input id="clientContact" placeholder="Contact"><br><br>
 <button onclick="addClient()">Add Client</button>
@@ -36,6 +37,50 @@
 <p id="status"></p>
 
 <script type="module">
+  window.addClient = function () {
+  const name = document.getElementById("clientName").value;
+  const contact = document.getElementById("clientContact").value;
+
+  const reminder = document.getElementById("reminderTime").value;
+
+const client = { name, contact, reminder };
+
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+  clients.push(client);
+
+  localStorage.setItem("clients", JSON.stringify(clients));
+
+  loadClients();
+};
+
+function loadClients() {
+  const list = document.getElementById("clientList");
+  list.innerHTML = "";
+
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+  clients.forEach(c => {
+    const li = document.createElement("li");
+    li.innerText = c.name + " - " + c.contact;
+    list.appendChild(li);
+  });
+}
+setInterval(() => {
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+  const now = new Date().toISOString();
+
+  clients.forEach(c => {
+    if (c.reminder && c.reminder <= now && !c.alerted) {
+      alert("Reminder for " + c.name);
+      c.alerted = true;
+    }
+  });
+
+  localStorage.setItem("clients", JSON.stringify(clients));
+}, 5000);
+  
+// Page load pe clients show
+loadClients();
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { 
@@ -105,36 +150,6 @@ window.logout = function () {
     document.getElementById("status").innerText = "Logged out 👋";
   });
 };
-
-  window.addClient = function () {
-  const name = document.getElementById("clientName").value;
-  const contact = document.getElementById("clientContact").value;
-
-  const client = { name, contact };
-
-  let clients = JSON.parse(localStorage.getItem("clients")) || [];
-  clients.push(client);
-
-  localStorage.setItem("clients", JSON.stringify(clients));
-
-  loadClients();
-};
-
-function loadClients() {
-  const list = document.getElementById("clientList");
-  list.innerHTML = "";
-
-  let clients = JSON.parse(localStorage.getItem("clients")) || [];
-
-  clients.forEach(c => {
-    const li = document.createElement("li");
-    li.innerText = c.name + " - " + c.contact;
-    list.appendChild(li);
-  });
-}
-
-// Page load pe clients show
-loadClients();
   
 </script>
 

@@ -3,86 +3,102 @@
 <head>
   <title>ClientPing AI</title>
 </head>
+
 <body style="font-family: Arial; text-align:center;">
 
-  <h1>🚀 ClientPing AI</h1>
+<h1>🚀 ClientPing AI</h1>
 
-  <div id="auth">
-    <h2>Signup</h2>
-    <input id="email" placeholder="Enter Email"><br><br>
-    <input id="password" type="password" placeholder="Enter Password"><br><br>
-    <button onclick="signup()">Signup</button>
+<!-- AUTH SECTION -->
+<div id="auth">
+  <h2>Signup</h2>
+  <input id="email" placeholder="Enter Email"><br><br>
+  <input id="password" type="password" placeholder="Enter Password"><br><br>
+  <button onclick="signup()">Signup</button>
 
-    <h2>Login</h2>
-    <button onclick="login()">Login</button>
-  </div>
+  <h2>Login</h2>
+  <button onclick="login()">Login</button>
+</div>
 
-  <div id="dashboard" style="display:none;">
-    <h2>Welcome to Dashboard 😍</h2>
-    <p>Your app is working!</p>
-  </div>
+<!-- DASHBOARD -->
+<div id="dashboard" style="display:none;">
+  <h2>Welcome to Dashboard 🚀</h2>
+  <p>Your app is working!</p>
+  <button onclick="logout()">Logout</button>
+</div>
 
-  <p id="status"></p>
+<p id="status"></p>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+<script type="module">
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyA9gNoGmnrUF8GVi_4SxtTGJZUJNK3_iFg",
-      authDomain: "client-ping-ai.firebaseapp.com",
-      projectId: "client-ping-ai",
-      storageBucket: "client-ping-ai.firebasestorage.app",
-      messagingSenderId: "150192483890",
-      appId: "1:150192483890:web:1f1251a6b799f68c12962b"
-    };
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+// 🔥 YOUR FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "client-ping-ai.firebaseapp.com",
+  projectId: "client-ping-ai",
+  storageBucket: "client-ping-ai.appspot.com",
+  messagingSenderId: "YOUR_ID",
+  appId: "YOUR_APP_ID"
+};
 
-    window.signup = function() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          document.getElementById("status").innerText = "Signup Successful 😍";
-        })
-        .catch((error) => {
-          document.getElementById("status").innerText = error.message;
-        });
-    }
-
-    window.login = function() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          document.getElementById("status").innerText = "Login Successful 😎";
-
-          // 🔥 Yaha magic ho raha hai
-          document.getElementById("auth").style.display = "none";
-          document.getElementById("dashboard").style.display = "block";
-        })
-        .catch((error) => {
-          document.getElementById("status").innerText = error.message;
-        });
-    }
-  </script>
-
-</body>
-</html>
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
+// ✅ AUTO LOGIN CHECK
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // User login hai
     document.getElementById("auth").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
   } else {
-    // User login nahi hai
     document.getElementById("auth").style.display = "block";
     document.getElementById("dashboard").style.display = "none";
   }
 });
+
+// ✅ SIGNUP
+window.signup = function () {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  createUserWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      document.getElementById("status").innerText = "Signup Successful 🎉";
+    })
+    .catch((error) => {
+      document.getElementById("status").innerText = error.message;
+    });
+};
+
+// ✅ LOGIN
+window.login = function () {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  signInWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      document.getElementById("status").innerText = "Login Successful 😎";
+    })
+    .catch((error) => {
+      document.getElementById("status").innerText = error.message;
+    });
+};
+
+// ✅ LOGOUT
+window.logout = function () {
+  signOut(auth).then(() => {
+    document.getElementById("status").innerText = "Logged out 👋";
+  });
+};
+
+</script>
+
+</body>
+</html>

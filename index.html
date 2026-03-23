@@ -2,113 +2,107 @@
 <html>
 <head>
   <title>ClientPing AI</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .box {
+      background: white;
+      color: black;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 400px;
+      margin: auto;
+      margin-top: 20px;
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      background: #667eea;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #5a67d8;
+    }
+  </style>
 </head>
 
-<body style="font-family: Arial; text-align:center;">
+<body>
 
 <h1>🚀 ClientPing AI</h1>
 
-<!-- AUTH SECTION -->
-<div id="auth">
-  <h2>Signup</h2>
-  <input id="email" placeholder="Enter Email"><br><br>
-  <input id="password" type="password" placeholder="Enter Password"><br><br>
-  <button onclick="signup()">Signup</button>
+<!-- AUTH -->
+<div id="auth" class="box">
+  <h2>Login / Signup</h2>
+  <input id="email" placeholder="Email"><br>
+  <input id="password" type="password" placeholder="Password"><br>
 
-  <h2>Login</h2>
+  <button onclick="signup()">Signup</button>
   <button onclick="login()">Login</button>
+
+  <p id="status"></p>
 </div>
 
 <!-- DASHBOARD -->
-<div id="dashboard" style="display:none;">
-  <h2>Welcome to Dashboard 🚀</h2>
-  <p>Your app is working!</p>
+<div id="dashboard" class="box" style="display:none;">
+  <h2>ClientPing Dashboard</h2>
+  <p>Manage your clients easily 😏</p>
+
   <button onclick="logout()">Logout</button>
-</div>
+
+  <hr>
+
   <h3>Add Client</h3>
-  <input id="reminderTime" type="datetime-local"><br><br>
-<input id="clientName" placeholder="Client Name"><br><br>
-<input id="clientContact" placeholder="Contact"><br><br>
-<button onclick="addClient()">Add Client</button>
+  <input id="clientName" placeholder="Client Name">
+  <input id="clientContact" placeholder="Contact">
+  <input id="reminderTime" type="datetime-local">
 
-<h3>Your Clients</h3>
-<ul id="clientList"></ul>
-<button onclick="generateMessage()">Generate Follow-up Message</button>
+  <button onclick="addClient()">Add Client</button>
 
-<p id="aiMessage"></p>
-<p id="status"></p>
+  <h3>Your Clients</h3>
+  <ul id="clientList"></ul>
+
+  <button onclick="generateMessage()">Generate AI Message</button>
+  <p id="aiMessage"></p>
+
+  <hr>
+
+  <h3>Upgrade Plan</h3>
+  <p>Free: 5 Clients</p>
+  <p>Pro: Unlimited - ₹299/month</p>
+  <button onclick="upgrade()">Upgrade</button>
+</div>
 
 <script type="module">
-  window.addClient = function () {
-  const name = document.getElementById("clientName").value;
-  const contact = document.getElementById("clientContact").value;
-
-  const reminder = document.getElementById("reminderTime").value;
-
-const client = { name, contact, reminder };
-
-  let clients = JSON.parse(localStorage.getItem("clients")) || [];
-  clients.push(client);
-
-  localStorage.setItem("clients", JSON.stringify(clients));
-
-  loadClients();
-};
-
-function loadClients() {
-  const list = document.getElementById("clientList");
-  list.innerHTML = "";
-
-  let clients = JSON.parse(localStorage.getItem("clients")) || [];
-
-  clients.forEach(c => {
-    const li = document.createElement("li");
-    li.innerText = c.name + " - " + c.contact;
-    list.appendChild(li);
-  });
-}
-setInterval(() => {
-  let clients = JSON.parse(localStorage.getItem("clients")) || [];
-  const now = new Date().toISOString();
-
-  clients.forEach(c => {
-    if (c.reminder && c.reminder <= now && !c.alerted) {
-      alert("Reminder for " + c.name);
-      c.alerted = true;
-    }
-  });
-
-  localStorage.setItem("clients", JSON.stringify(clients));
-}, 5000);
-  window.generateMessage = function () {
-  let clients = JSON.parse(localStorage.getItem("clients")) || [];
-
-  if (clients.length === 0) {
-    document.getElementById("aiMessage").innerText = "No clients found";
-    return;
-  }
-
-  // Last added client
-  const client = clients[clients.length - 1];
-
-  const message = `Hi ${client.name}, just checking in! Let me know if you need any help.`;
-
-  document.getElementById("aiMessage").innerText = message;
-};
-  
-// Page load pe clients show
-loadClients();
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { 
-  getAuth, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// 🔥 YOUR FIREBASE CONFIG
+// 🔥 FIREBASE CONFIG (replace your real one)
 const firebaseConfig = {
   apiKey: "AIzaSyA9gNoGmnrUF8GVi_4SxtTGJZUJNK3_iFg",
   authDomain: "client-ping-ai.firebaseapp.com",
@@ -122,18 +116,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// ✅ AUTO LOGIN CHECK
+// AUTH STATE
 onAuthStateChanged(auth, (user) => {
   if (user) {
     document.getElementById("auth").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
+    loadClients();
   } else {
     document.getElementById("auth").style.display = "block";
     document.getElementById("dashboard").style.display = "none";
   }
 });
 
-// ✅ SIGNUP
+// SIGNUP
 window.signup = function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -142,12 +137,12 @@ window.signup = function () {
     .then(() => {
       document.getElementById("status").innerText = "Signup Successful 🎉";
     })
-    .catch((error) => {
-      document.getElementById("status").innerText = error.message;
+    .catch(e => {
+      document.getElementById("status").innerText = e.message;
     });
 };
 
-// ✅ LOGIN
+// LOGIN
 window.login = function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -156,18 +151,84 @@ window.login = function () {
     .then(() => {
       document.getElementById("status").innerText = "Login Successful 😎";
     })
-    .catch((error) => {
-      document.getElementById("status").innerText = error.message;
+    .catch(e => {
+      document.getElementById("status").innerText = e.message;
     });
 };
 
-// ✅ LOGOUT
+// LOGOUT
 window.logout = function () {
-  signOut(auth).then(() => {
-    document.getElementById("status").innerText = "Logged out 👋";
-  });
+  signOut(auth);
 };
-  
+
+// ADD CLIENT
+window.addClient = function () {
+  const name = document.getElementById("clientName").value;
+  const contact = document.getElementById("clientContact").value;
+  const reminder = document.getElementById("reminderTime").value;
+
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+  if (clients.length >= 5) {
+    alert("Free limit reached! Upgrade 🚀");
+    return;
+  }
+
+  clients.push({ name, contact, reminder });
+
+  localStorage.setItem("clients", JSON.stringify(clients));
+  loadClients();
+};
+
+// LOAD CLIENTS
+function loadClients() {
+  const list = document.getElementById("clientList");
+  list.innerHTML = "";
+
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+  clients.forEach(c => {
+    const li = document.createElement("li");
+    li.innerText = `${c.name} - ${c.contact}`;
+    list.appendChild(li);
+  });
+}
+
+// REMINDER SYSTEM
+setInterval(() => {
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+  const now = new Date().toISOString();
+
+  clients.forEach(c => {
+    if (c.reminder && c.reminder <= now && !c.alerted) {
+      alert("Reminder for " + c.name);
+      c.alerted = true;
+    }
+  });
+
+  localStorage.setItem("clients", JSON.stringify(clients));
+}, 5000);
+
+// AI MESSAGE
+window.generateMessage = function () {
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+  if (clients.length === 0) {
+    document.getElementById("aiMessage").innerText = "No clients found";
+    return;
+  }
+
+  const client = clients[clients.length - 1];
+
+  document.getElementById("aiMessage").innerText =
+    `Hi ${client.name}, just checking in! Let me know if you need any help.`;
+};
+
+// UPGRADE
+window.upgrade = function () {
+  alert("Payment coming soon 😏");
+};
+
 </script>
 
 </body>

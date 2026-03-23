@@ -33,7 +33,9 @@
 
 <h3>Your Clients</h3>
 <ul id="clientList"></ul>
+<button onclick="generateMessage()">Generate Follow-up Message</button>
 
+<p id="aiMessage"></p>
 <p id="status"></p>
 
 <script type="module">
@@ -78,6 +80,21 @@ setInterval(() => {
 
   localStorage.setItem("clients", JSON.stringify(clients));
 }, 5000);
+  window.generateMessage = function () {
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+  if (clients.length === 0) {
+    document.getElementById("aiMessage").innerText = "No clients found";
+    return;
+  }
+
+  // Last added client
+  const client = clients[clients.length - 1];
+
+  const message = `Hi ${client.name}, just checking in! Let me know if you need any help.`;
+
+  document.getElementById("aiMessage").innerText = message;
+};
   
 // Page load pe clients show
 loadClients();

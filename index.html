@@ -163,7 +163,7 @@ window.logout = function () {
 };
 
 // ADD CLIENT
-window.addClient = function () {
+window.addClient = async function () {
   const name = document.getElementById("clientName").value;
   const contact = document.getElementById("clientContact").value;
   const reminder = document.getElementById("reminderTime").value;
@@ -188,7 +188,7 @@ window.addClient = function () {
 };
 
 // LOAD CLIENTS
-function loadClients() {
+  async function loadClients() {
   const list = document.getElementById("clientList");
   list.innerHTML = "";
 

@@ -1,150 +1,115 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ClientPing AI - Pro</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
-<style>
-  body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: #333;
-  }
-  /* Sidebar */
-  #sidebar {
-    position: fixed;
-    top: 0; left: 0;
-    width: 70px;
-    height: 100%;
-    background: #5a67d8;
-    display: flex; flex-direction: column; align-items: center; padding-top: 20px;
-  }
-  #sidebar i {
-    font-size: 24px; color: #fff;
-    margin: 20px 0;
-    cursor: pointer;
-  }
-  #sidebar i.active {
-    color: #ffd700;
-  }
-  /* Top bar */
-  #topbar {
-    margin-left: 70px;
-    padding: 10px 20px;
-    background: #764ba2;
-    color: #fff;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  /* Main content */
-  #main {
-    margin-left: 70px;
-    padding: 20px;
-  }
-  .card {
-    background: #fff; color: #333;
-    border-radius: 12px;
-    padding: 15px;
-    margin: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .btn {
-    background: #667eea; color: #fff;
-    border: none; padding: 8px 12px;
-    border-radius: 8px; cursor: pointer;
-    margin-left: 5px;
-  }
-  .btn:hover { background: #5a67d8; }
-  input { padding: 8px; border-radius: 8px; border: 1px solid #ccc; margin: 5px; width: 200px; }
-  .modal {
-    display:none; position: fixed; z-index:1000;
-    left:0; top:0; width:100%; height:100%;
-    background: rgba(0,0,0,0.5);
-    justify-content:center; align-items:center;
-  }
-  .modal-content {
-    background:#fff; padding:20px; border-radius:12px; width:400px; max-height:90%; overflow:auto;
-  }
-</style>
+  <title>ClientPing AI</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .box {
+      background: white;
+      color: black;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 400px;
+      margin: auto;
+      margin-top: 20px;
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      background: #667eea;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #5a67d8;
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- Sidebar -->
-<div id="sidebar">
-  <i class="fas fa-users active" title="Clients" onclick="showPage('clients')"></i>
-  <i class="fas fa-envelope" title="AI Messages" onclick="showPage('ai')"></i>
-  <i class="fas fa-bell" title="Reminders" onclick="showPage('reminders')"></i>
-  <i class="fas fa-wallet" title="Payments" onclick="showPage('payments')"></i>
-  <i class="fas fa-cog" title="Settings" onclick="showPage('settings')"></i>
+<h1>🚀 ClientPing AI</h1>
+
+<!-- AUTH -->
+<div id="auth" class="box">
+  <h2>Login / Signup</h2>
+  <input id="email" placeholder="Email"><br>
+  <input id="password" type="password" placeholder="Password"><br>
+
+  <button onclick="signup()">Signup</button>
+  <button onclick="login()">Login</button>
+
+  <p id="status"></p>
 </div>
 
-<!-- Top Bar -->
-<div id="topbar">
-  <div id="userInfo">Hello, User | Plan: <span id="planStatus">Free</span></div>
-  <button class="btn" onclick="logout()">Logout</button>
-</div>
+<!-- DASHBOARD -->
+<div id="dashboard" class="box" style="display:none;">
+  <h2>ClientPing Dashboard</h2>
+  <p>Manage your clients easily 😏</p>
 
-<!-- Main Content -->
-<div id="main">
-  <!-- Clients Page -->
-  <div id="clientsPage">
-    <h2>Clients</h2>
-    <input id="clientName" placeholder="Name">
-    <input id="clientContact" placeholder="Contact">
-    <input id="reminderTime" type="datetime-local">
-    <button class="btn" onclick="addClient()">Add Client</button>
-    <div id="clientList"></div>
-  </div>
+  <button onclick="logout()">Logout</button>
 
-  <!-- AI Messages Page -->
-  <div id="aiPage" style="display:none;">
-    <h2>AI Generated Messages</h2>
-    <div id="aiMessage"></div>
-    <button class="btn" onclick="generateMessage()">Generate Message</button>
-    <button class="btn" onclick="sendWhatsApp()">Send WhatsApp</button>
-  </div>
+  <hr>
 
-  <!-- Reminders Page -->
-  <div id="remindersPage" style="display:none;">
-    <h2>Smart Reminders</h2>
-    <ul id="reminderList"></ul>
-  </div>
+  <h3>Add Client</h3>
+  <input id="clientName" placeholder="Client Name">
+  <input id="clientContact" placeholder="Contact">
+  <input id="reminderTime" type="datetime-local">
 
-  <!-- Payments Page -->
-  <div id="paymentsPage" style="display:none;">
-    <h2>Upgrade to Pro</h2>
-    <p>Free: 5 Clients | Pro: Unlimited ₹299/month</p>
-    <button class="btn" onclick="upgrade()">Pay via UPI</button>
-  </div>
+  <button onclick="addClient()">Add Client</button>
+    
+  <h3>Your Clients</h3>
+  <ul id="clientList"></ul>
 
-  <!-- Settings Page -->
-  <div id="settingsPage" style="display:none;">
-    <h2>Settings</h2>
-    <button class="btn" onclick="toggleTheme()">Toggle Dark/Light</button>
-  </div>
-</div>
 
-<!-- Modal for Client Details -->
-<div id="clientModal" class="modal">
-  <div class="modal-content">
-    <h3 id="modalName"></h3>
-    <p id="modalContact"></p>
-    <p id="modalLastContact"></p>
-    <textarea id="modalNotes" placeholder="Notes"></textarea><br>
-    <button class="btn" onclick="generateMessage(true)">AI Message</button>
-    <button class="btn" onclick="sendWhatsApp(true)">Send WhatsApp</button>
-    <button class="btn" onclick="closeModal()">Close</button>
-  </div>
+  <button onclick="generateMessage()">Generate AI Message</button>
+  <p id="aiMessage"></p>
+
+  <hr>
+
+  <h3>Upgrade Plan</h3>
+  <p>Free: 5 Clients</p>
+  <p>Pro: Unlimited - ₹299/month</p>
+  <button onclick="upgrade()">Upgrade</button>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// 🔥 Firebase Config - Replace with yours
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+ import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// 🔥 FIREBASE CONFIG (replace your real one)
 const firebaseConfig = {
   apiKey: "AIzaSyA9gNoGmnrUF8GVi_4SxtTGJZUJNK3_iFg",
   authDomain: "client-ping-ai.firebaseapp.com",
@@ -154,125 +119,223 @@ const firebaseConfig = {
   appId: "1:150192483890:web:1f1251a6b799f68c12962b",
   measurementId: "G-Z9C3P9BLY2"
 };
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
 
-// Auth State
-onAuthStateChanged(auth, user => {
-  if(user){
-    document.getElementById('userInfo').innerText = `Hello, ${user.email} | Plan: ${localStorage.getItem('plan')||'Free'}`;
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+  
+  const auth = getAuth(app);
+
+// AUTH STATE
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    document.getElementById("auth").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
     loadClients();
   } else {
-    // Show login/signup modal or redirect
-    alert("Please login/signup first");
+    document.getElementById("auth").style.display = "block";
+    document.getElementById("dashboard").style.display = "none";
   }
 });
 
-// Logout
-function logout(){ signOut(auth); alert("Logged out"); }
+// SIGNUP
+window.signup = function () {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-// Page Navigation
-function showPage(page){
-  ['clients','ai','reminders','payments','settings'].forEach(p=>{
-    document.getElementById(p+'Page').style.display = (p===page)?'block':'none';
-  });
-  document.querySelectorAll('#sidebar i').forEach(ic=>ic.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+  createUserWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      document.getElementById("status").innerText = "Signup Successful 🎉";
+    })
+    .catch(e => {
+      document.getElementById("status").innerText = e.message;
+    });
+};
+
+// LOGIN
+window.login = function () {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  signInWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      document.getElementById("status").innerText = "Login Successful 😎";
+    })
+    .catch(e => {
+      document.getElementById("status").innerText = e.message;
+    });
+};
+
+// LOGOUT
+window.logout = function () {
+  signOut(auth);
+};
+
+// ADD CLIENT
+window.addClient = async function () {
+  let plan = localStorage.getItem("plan") || "free";
+
+let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+if (plan !== "pro" && clients.length >= 5) {
+  alert("Free limit reached! Upgrade to Pro 🚀");
+  return;
 }
-
-// Add Client
-async function addClient(){
-  let plan = localStorage.getItem("plan")||'free';
-  let clients = JSON.parse(localStorage.getItem('clients')||'[]');
-  if(plan!=='pro' && clients.length>=5){ alert("Free limit reached! Upgrade to Pro 🚀"); return; }
-
   const name = document.getElementById("clientName").value;
   const contact = document.getElementById("clientContact").value;
   const reminder = document.getElementById("reminderTime").value;
 
-  const user = auth.currentUser;
-  await addDoc(collection(db,'clients'),{
-    name, contact, reminder, lastContact: new Date().toISOString(), followedUp:false, userId:user.uid
-  });
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
 
-  clients.push({name,contact,reminder,lastContact:new Date().toISOString(),followedUp:false,userId:user.uid});
-  localStorage.setItem('clients',JSON.stringify(clients));
+  if (clients.length >= 5) {
+    alert("Free limit reached! Upgrade 🚀");
+    return;
+  }
+
+  await addDoc(collection(db, "clients"), {
+  name,
+  contact,
+  reminder,
+  lastContact: new Date().toISOString(),
+  followedUp: false,
+    userId: auth.currentUser.uid // 🔥 add this
+});
+
+  localStorage.setItem("clients", JSON.stringify(clients));
   loadClients();
-}
+};
 
-// Load Clients
-async function loadClients(){
-  const list = document.getElementById('clientList');
-  list.innerHTML='';
-  const querySnapshot = await getDocs(collection(db,'clients'));
-  querySnapshot.forEach(doc=>{
-    const c = doc.data();
-    if(c.userId!==auth.currentUser.uid) return;
-    const card = document.createElement('div'); card.className='card';
-    card.innerHTML=`<div>${c.name} - ${c.contact}</div>
-      <div>
-      <button class="btn" onclick="openModal('${c.name}','${c.contact}','${c.lastContact}')">Details</button>
-      </div>`;
-    list.appendChild(card);
+// LOAD CLIENTS
+  async function loadClients() {
+  const list = document.getElementById("clientList");
+  list.innerHTML = "";
+
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+  clients.forEach(c => {
+    const li = document.createElement("li");
+    if (c.userId !== auth.currentUser.uid) return;
+    li.innerHTML = `
+  ${c.name} - ${c.contact}
+  <button onclick="sendMsg('${c.contact}')">Send Msg</button>
+`;
+    list.appendChild(li);
   });
 }
 
-// Client Modal
-function openModal(name,contact,last){
-  document.getElementById('modalName').innerText=name;
-  document.getElementById('modalContact').innerText='Contact: '+contact;
-  document.getElementById('modalLastContact').innerText='Last Contact: '+last;
-  document.getElementById('clientModal').style.display='flex';
-}
-function closeModal(){ document.getElementById('clientModal').style.display='none'; }
-
-// AI Messages
-function generateMessage(forModal=false){
-  let clients = JSON.parse(localStorage.getItem('clients')||'[]');
-  if(clients.length===0){ alert("No clients"); return; }
-  const client = clients[clients.length-1];
-  const message = `Hi ${client.name}, just checking in! Need any help? 😊`;
-  if(forModal){ alert("AI Message: "+message); return; }
-  document.getElementById('aiMessage').innerText=message;
-}
-
-// WhatsApp Send
-function sendWhatsApp(forModal=false){
-  let clients = JSON.parse(localStorage.getItem('clients')||'[]');
-  if(clients.length===0){ alert("No clients"); return; }
-  const client = clients[clients.length-1];
-  const phone = client.contact;
-  const msg = document.getElementById('aiMessage').innerText||`Hi ${client.name}, just checking in!`;
-  if(forModal){ window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank'); return; }
-  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank');
-}
-
-// Smart Reminders
-setInterval(()=>{
-  let clients = JSON.parse(localStorage.getItem('clients')||'[]');
+// REMINDER SYSTEM
+setInterval(() => {
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
   const now = new Date().toISOString();
-  const remList = document.getElementById('reminderList'); remList.innerHTML='';
-  clients.forEach(c=>{
-    if(!c.reminder) return;
-    const li = document.createElement('li');
-    li.innerText=`${c.name}: ${c.reminder} ${c.reminder<=now?'⏰ Overdue':'🕒 Upcoming'}`;
-    remList.appendChild(li);
+
+  clients.forEach(c => {
+    if (c.reminder && c.reminder <= now && !c.alerted) {
+      alert("Reminder for " + c.name);
+      c.alerted = true;
+    }
   });
-},5000);
 
-// Upgrade / Payments
-function upgrade(){
-  alert("Redirecting to UPI payment...");
-  const upiID='YOUR_UPI_ID@upi';
-  window.open(`upi://pay?pa=${upiID}&pn=ClientPingPro&am=299&cu=INR`,'_blank');
-}
+  localStorage.setItem("clients", JSON.stringify(clients));
+}, 5000);
 
-// Theme Toggle
-function toggleTheme(){
-  document.body.style.background=document.body.style.background.includes('#667eea')?'#1e1e2f':'linear-gradient(135deg, #667eea, #764ba2)';
+// AI MESSAGE
+window.generateMessage = function () {
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+  if (clients.length === 0) {
+    document.getElementById("aiMessage").innerText = "No clients found";
+    return;
+  }
+
+  const client = clients[clients.length - 1];
+
+  document.getElementById("aiMessage").innerText =
+    `Hi ${client.name}, just checking in! Let me know if you need any help.`;
+};
+  window.sendWhatsApp = function () {
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+  if (clients.length === 0) {
+    alert("No clients found");
+    return;
+  }
+
+  const client = clients[clients.length - 1];
+
+  const message = document.getElementById("aiMessage").innerText;
+
+  const phone = client.contact;
+
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+  window.open(url, "_blank");
+};
+function smartFollowUp() {
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+  const now = new Date();
+
+  clients.forEach(c => {
+    if (!c.lastContact) {
+      c.lastContact = new Date().toISOString();
+    }
+
+    const last = new Date(c.lastContact);
+    const diffDays = (now - last) / (1000 * 60 * 60 * 24);
+
+    // 🔥 AI DECISION
+    if (diffDays >= 2 && !c.followedUp) {
+
+      let message = "";
+
+      if (diffDays > 5) {
+        message = `Hi ${c.name}, it's been a while! Just checking if you need any help 😊`;
+      } else {
+        message = `Hey ${c.name}, just following up on our last conversation.`;
+      }
+
+      let phone = c.contact;
+
+let url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+window.open(url, "_blank");
+
+      c.followedUp = true;
+    }
+  });
+
+  localStorage.setItem("clients", JSON.stringify(clients));
+        }
+  setInterval(() => {
+  smartFollowUp();
+}, 10000);
+  
+// UPGRADE
+window.upgrade = function () {
+  const upiId = "yourupi@bank"; // Replace with your UPI ID
+  const amount = 299; // ₹299
+  const message = `Payment for ClientPing AI Pro Plan`;
+
+  // Google Pay / UPI payment link
+  const url = `upi://pay?pa=${upiId}&pn=ClientPing AI&am=${amount}&cu=INR&tn=${encodeURIComponent(message)}`;
+
+  window.open(url, "_blank"); // Open UPI app
+
+  // Unlock Pro plan locally (test)
+  localStorage.setItem("plan", "pro");
+  alert("Payment link opened! After completing payment, you can use Pro Plan 🔥");
+};
+function sendMsg(phone) {
+  let message = document.getElementById("aiMessage").innerText;
+
+  if (!message) {
+    message = "Hello from ClientPing AI 😊";
+  }
+
+  let url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+  window.open(url, "_blank");
 }
 
 </script>
+
 </body>
 </html>

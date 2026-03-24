@@ -76,13 +76,10 @@
   <input id="reminderTime" type="datetime-local">
 
   <button onclick="addClient()">Add Client</button>
-    lastContact: new Date().toISOString(),
-    followedUp: false
-  clients.push({ name, contact, reminder, lastContact: new Date().toISOString(), followedUp: false });
-  
+    
   <h3>Your Clients</h3>
   <ul id="clientList"></ul>
-  <button onclick="sendWhatsApp()">Send WhatsApp Message</button>
+
 
   <button onclick="generateMessage()">Generate AI Message</button>
   <p id="aiMessage"></p>
@@ -178,7 +175,13 @@ window.addClient = function () {
     return;
   }
 
-  clients.push({ name, contact, reminder });
+  clients.push({
+  name,
+  contact,
+  reminder,
+  lastContact: new Date().toISOString(),
+  followedUp: false
+});
 
   localStorage.setItem("clients", JSON.stringify(clients));
   loadClients();
@@ -193,7 +196,10 @@ function loadClients() {
 
   clients.forEach(c => {
     const li = document.createElement("li");
-    li.innerText = `${c.name} - ${c.contact}`;
+    li.innerHTML = `
+  ${c.name} - ${c.contact}
+  <button onclick="sendMsg('${c.contact}')">Send Msg</button>
+`;
     list.appendChild(li);
   });
 }
@@ -268,7 +274,11 @@ function smartFollowUp() {
         message = `Hey ${c.name}, just following up on our last conversation.`;
       }
 
-      alert("AI Follow-up: " + message);
+      let phone = c.contact;
+
+let url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+window.open(url, "_blank");
 
       c.followedUp = true;
     }
@@ -284,6 +294,17 @@ function smartFollowUp() {
 window.upgrade = function () {
   alert("Payment coming soon 😏");
 };
+function sendMsg(phone) {
+  let message = document.getElementById("aiMessage").innerText;
+
+  if (!message) {
+    message = "Hello from ClientPing AI 😊";
+  }
+
+  let url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+  window.open(url, "_blank");
+}
 
 </script>
 

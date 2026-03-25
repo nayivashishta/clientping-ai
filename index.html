@@ -1,6 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
+ script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+<script>
+  //  FIREBASE CONFIG (replace your real one
+  const firebaseConfig = {
+  apiKey: "AIzaSyA9gNoGmnrUF8GVi_4SxtTGJZUJNK3_iFg",
+  authDomain: "client-ping-ai.firebaseapp.com",
+  projectId: "client-ping-ai",
+  storageBucket:  "client-ping-ai.firebasestorage.app",
+  messagingSenderId:  "150192483890",
+  appId: "1:150192483890:web:1f1251a6b799f68c12962b",
+  measurementId: "G-Z9C3P9BLY2"
+};
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  
+  </script>
+  
   <title>ClientPing AI</title>
 
   <style>
@@ -108,22 +128,6 @@ import {
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-//  FIREBASE CONFIG (replace your real one)
-const firebaseConfig = {
-  apiKey: "AIzaSyA9gNoGmnrUF8GVi_4SxtTGJZUJNK3_iFg",
-  authDomain: "client-ping-ai.firebaseapp.com",
-  projectId: "client-ping-ai",
-  storageBucket:  "client-ping-ai.firebasestorage.app",
-  messagingSenderId:  "150192483890",
-  appId: "1:150192483890:web:1f1251a6b799f68c12962b",
-  measurementId: "G-Z9C3P9BLY2"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-  
-  const auth = getAuth(app);
 
 // AUTH STATE
 onAuthStateChanged(auth, (user) => {

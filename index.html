@@ -1,1 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ClientPing AI</title>
 
+  <style>
+    body {
+      font-family: Arial;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .box {
+      background: white;
+      color: black;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 400px;
+      margin: auto;
+      margin-top: 20px;
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      background: #667eea;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #5a67d8;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>🚀 ClientPing AI</h1>
+
+<!-- AUTH -->
+<div id="auth" class="box">
+  <h2>Login / Signup</h2>
+  <input id="email" placeholder="Email"><br>
+  <input id="password" type="password" placeholder="Password"><br>
+
+  <button onclick="signup()">Signup</button>
+  <button onclick="login()">Login</button>
+
+  <p id="status"></p>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="box" style="display:none;">
+  <h2>ClientPing Dashboard</h2>
+  <p>Manage your clients easily 😏</p>
+
+  <button onclick="logout()">Logout</button>
+
+  <hr>
+
+  <h3>Add Client</h3>
+  <input id="clientName" placeholder="Client Name">
+  <input id="clientContact" placeholder="Contact">
+  <input id="reminderTime" type="datetime-local">
+
+  <button onclick="addClient()">Add Client</button>
+    
+  <h3>Your Clients</h3>
+  <ul id="clientList"></ul>
+
+
+  <button onclick="generateMessage()">Generate AI Message</button>
+  <p id="aiMessage"></p>
+
+  <hr>
+
+  <h3>Upgrade Plan</h3>
+  <p>Free: 5 Clients</p>
+  <p>Pro: Unlimited - ₹299/month</p>
+  <button onclick="upgrade()">Upgrade</button>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+ import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// 🔥 FIREBASE CONFIG (replace your real one)
+const firebaseConfig = {
+  apiKey: "AIzaSyA9gNoGmnrUF8GVi_4SxtTGJZUJNK3_iFg",
+  authDomain: "client-ping-ai.firebaseapp.com",
+  projectId: "client-ping-ai",
+  storageBucket:  "client-ping-ai.firebasestorage.app",
+  messagingSenderId:  "150192483890",
+  appId: "1:150192483890:web:1f1251a6b799f68c12962b",
+  measurementId: "G-Z9C3P9BLY2"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+  
+  const auth = getAuth(app);
+
+// AUTH STATE
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    document.getElementById("auth").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+    loadClients();
+  } else {
+    document.getElementById("auth").style.display = "block";
+    document.getElementById("dashboard").style.display = "none";
+  }
+});
+
+// SIGNUP
+window.signup = function () {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  createUserWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      document.getElementById("status").innerText = "Signup Successful 🎉";
+    })
+    .catch(e => {
+      document.getElementById("status").innerText = e.message;
+    });
+};
+
+// LOGIN
+window.login = function () {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  signInWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      document.getElementById("status").innerText = "Login Successful 😎";
+    })
+    .catch(e => {
+      document.getElementById("status").innerText = e.message;
+    });
+};
+
+// LOGOUT
+window.logout = function () {
+  signOut(auth);
+};
+
+// ADD CLIENT
+window.addClient = async function () {
+  let plan = localStorage.getItem("plan") || "free";
+
+let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+if (plan !== "pro" && clients.length >= 5) {
+  alert("Free limit reached! Upgrade to Pro 🚀");
+  return;
+}
+  const name = document.getElementById("clientName").value;
+  const contact = document.getElementById("clientContact").value;
+  const reminder = document.getElementById("reminderTime").value;
+
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+  if (clients.length >= 5) {
+    alert("Free limit reached! Upgrade 🚀");
+    return;
+  }
+
+  await addDoc(collection(db, "clients"), {
+  name,
+  contact,
+  reminder,
+  lastContact: new Date().toISOString(),
+  followedUp: false,
+    userId: auth.currentUser.uid // 🔥 add this
+});
+
+  localStorage.setItem("clients", JSON.stringify(clients));
+  loadClients();
+};
+
+// LOAD CLIENTS
+  async function loadClients() {
+  const list = document.getElementById("clientList");
+  list.innerHTML = "";
+
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+  clients.forEach(c => {
+    const li = document.createElement("li");
+    if (c.userId !== auth.currentUser.uid) return;
+    li.innerHTML = `
+  ${c.name} - ${c.contact}
+  <button onclick="sendMsg('${c.contact}')">Send Msg</button>
+`;
+    list.appendChild(li);
+  });
+}
+
+// REMINDER SYSTEM
+setInterval(() => {
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+  const now = new Date().toISOString();
+
+  clients.forEach(c => {
+    if (c.reminder && c.reminder <= now && !c.alerted) {
+      alert("Reminder for " + c.name);
+      c.alerted = true;
+    }
+  });
+
+  localStorage.setItem("clients", JSON.stringify(clients));
+}, 5000);
+
+// AI MESSAGE
+window.generateMessage = function () {
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+  if (clients.length === 0) {
+    document.getElementById("aiMessage").innerText = "No clients found";
+    return;
+  }
+
+  const client = clients[clients.length - 1];
+
+  document.getElementById("aiMessage").innerText =
+    `Hi ${client.name}, just checking in! Let me know if you need any help.`;
+};
+  window.sendWhatsApp = function () {
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+  if (clients.length === 0) {
+    alert("No clients found");
+    return;
+  }
+
+  const client = clients[clients.length - 1];
+
+  const message = document.getElementById("aiMessage").innerText;
+
+  const phone = client.contact;
+
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+  window.open(url, "_blank");
+};
+function smartFollowUp() {
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+  const now = new Date();
+
+  clients.forEach(c => {
+    if (!c.lastContact) {
+      c.lastContact = new Date().toISOString();
+    }
+
+    const last = new Date(c.lastContact);
+    const diffDays = (now - last) / (1000 * 60 * 60 * 24);
+
+    // 🔥 AI DECISION
+    if (diffDays >= 2 && !c.followedUp) {
+
+      let message = "";
+
+      if (diffDays > 5) {
+        message = `Hi ${c.name}, it's been a while! Just checking if you need any help 😊`;
+      } else {
+        message = `Hey ${c.name}, just following up on our last conversation.`;
+      }
+
+      let phone = c.contact;
+
+let url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+window.open(url, "_blank");
+
+      c.followedUp = true;
+    }
+  });
+
+  localStorage.setItem("clients", JSON.stringify(clients));
+        }
+  setInterval(() => {
+  smartFollowUp();
+}, 10000);
+  
+// UPGRADE
+window.upgrade = function () {
+  const upiId = "yourupi@bank"; // Replace with your UPI ID
+  const amount = 299; // ₹299
+  const message = `Payment for ClientPing AI Pro Plan`;
+
+  // Google Pay / UPI payment link
+  const url = `upi://pay?pa=${upiId}&pn=ClientPing AI&am=${amount}&cu=INR&tn=${encodeURIComponent(message)}`;
+
+  window.open(url, "_blank"); // Open UPI app
+
+  // Unlock Pro plan locally (test)
+  localStorage.setItem("plan", "pro");
+  alert("Payment link opened! After completing payment, you can use Pro Plan 🔥");
+};
+function sendMsg(phone) {
+  let message = document.getElementById("aiMessage").innerText;
+
+  if (!message) {
+    message = "Hello from ClientPing AI 😊";
+  }
+
+  let url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+  window.open(url, "_blank");
+}
+
+</script>
+
+</body>
+</html>

@@ -138,13 +138,13 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // SIGNUP
-window.signup = function () {
+  window.signup = function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  createUserWithEmailAndPassword(auth, email, password)
+  firebase.auth().createUserWithEmailAndPassword(email, password)
     .then(() => {
-      document.getElementById("status").innerText = "Signup Successful ";
+      document.getElementById("status").innerText = "Signup Successful";
     })
     .catch(e => {
       document.getElementById("status").innerText = e.message;
@@ -158,14 +158,12 @@ window.login = function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  alert("Email: " + email);
-
   firebase.auth().signInWithEmailAndPassword(email, password)
     .then(() => {
       alert("Login success");
     })
     .catch((error) => {
-      alert("Error: " + error.message);
+      alert(error.message);
     });
 };
 // LOGOUT

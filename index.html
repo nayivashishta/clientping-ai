@@ -47,7 +47,7 @@
 
 <body>
 
-<h1>🚀 ClientPing AI</h1>
+<h1> ClientPing AI</h1>
 
 <!-- AUTH -->
 <div id="auth" class="box">
@@ -64,7 +64,7 @@
 <!-- DASHBOARD -->
 <div id="dashboard" class="box" style="display:none;">
   <h2>ClientPing Dashboard</h2>
-  <p>Manage your clients easily 😏</p>
+  <p>Manage your clients easily </p>
 
   <button onclick="logout()">Logout</button>
 
@@ -109,7 +109,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// 🔥 FIREBASE CONFIG (replace your real one)
+//  FIREBASE CONFIG (replace your real one)
 const firebaseConfig = {
   apiKey: "AIzaSyA9gNoGmnrUF8GVi_4SxtTGJZUJNK3_iFg",
   authDomain: "client-ping-ai.firebaseapp.com",
@@ -144,7 +144,7 @@ window.signup = function () {
 
   createUserWithEmailAndPassword(auth, email, password)
     .then(() => {
-      document.getElementById("status").innerText = "Signup Successful 🎉";
+      document.getElementById("status").innerText = "Signup Successful ";
     })
     .catch(e => {
       document.getElementById("status").innerText = e.message;
@@ -153,18 +153,21 @@ window.signup = function () {
 
 // LOGIN
 window.login = function () {
+  alert("Login button clicked");
+
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  signInWithEmailAndPassword(auth, email, password)
+  alert("Email: " + email);
+
+  firebase.auth().signInWithEmailAndPassword(email, password)
     .then(() => {
-      document.getElementById("status").innerText = "Login Successful 😎";
+      alert("Login success");
     })
-    .catch(e => {
-      document.getElementById("status").innerText = e.message;
+    .catch((error) => {
+      alert("Error: " + error.message);
     });
 };
-
 // LOGOUT
 window.logout = function () {
   signOut(auth);
@@ -177,7 +180,7 @@ window.addClient = async function () {
 let clients = JSON.parse(localStorage.getItem("clients")) || [];
 
 if (plan !== "pro" && clients.length >= 5) {
-  alert("Free limit reached! Upgrade to Pro 🚀");
+  alert("Free limit reached! Upgrade to Pro ");
   return;
 }
   const name = document.getElementById("clientName").value;
@@ -187,7 +190,7 @@ if (plan !== "pro" && clients.length >= 5) {
   let clients = JSON.parse(localStorage.getItem("clients")) || [];
 
   if (clients.length >= 5) {
-    alert("Free limit reached! Upgrade 🚀");
+    alert("Free limit reached! Upgrade ");
     return;
   }
 
@@ -197,7 +200,7 @@ if (plan !== "pro" && clients.length >= 5) {
   reminder,
   lastContact: new Date().toISOString(),
   followedUp: false,
-    userId: auth.currentUser.uid // 🔥 add this
+    userId: auth.currentUser.uid //  add this
 });
 
   localStorage.setItem("clients", JSON.stringify(clients));
@@ -281,13 +284,13 @@ function smartFollowUp() {
     const last = new Date(c.lastContact);
     const diffDays = (now - last) / (1000 * 60 * 60 * 24);
 
-    // 🔥 AI DECISION
+    //  AI DECISION
     if (diffDays >= 2 && !c.followedUp) {
 
       let message = "";
 
       if (diffDays > 5) {
-        message = `Hi ${c.name}, it's been a while! Just checking if you need any help 😊`;
+        message = `Hi ${c.name}, it's been a while! Just checking if you need any help `;
       } else {
         message = `Hey ${c.name}, just following up on our last conversation.`;
       }
@@ -321,13 +324,13 @@ window.upgrade = function () {
 
   // Unlock Pro plan locally (test)
   localStorage.setItem("plan", "pro");
-  alert("Payment link opened! After completing payment, you can use Pro Plan 🔥");
+  alert("Payment link opened! After completing payment, you can use Pro Plan ");
 };
 function sendMsg(phone) {
   let message = document.getElementById("aiMessage").innerText;
 
   if (!message) {
-    message = "Hello from ClientPing AI 😊";
+    message = "Hello from ClientPing AI ";
   }
 
   let url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;

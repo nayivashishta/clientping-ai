@@ -52,6 +52,7 @@
     <h3>Add Client</h3>
     <input id="clientName" placeholder="Name">
     <input id="clientPhone" placeholder="Phone">
+    <input id="reminderTime" type="datetime-local"><br>
     <button onclick="addClient()">Add</button>
   </div>
 
@@ -120,9 +121,10 @@ function addClient() {
   let clients = JSON.parse(localStorage.getItem("clients")) || [];
 
   clients.push({
-    name: clientName.value,
-    phone: clientPhone.value
-  });
+  name: clientName.value,
+  phone: clientPhone.value,
+  reminder: reminderTime.value
+});
 
   localStorage.setItem("clients", JSON.stringify(clients));
   loadClients();
@@ -136,6 +138,7 @@ function loadClients() {
     clientList.innerHTML += `
       <div style="margin:10px; padding:10px; background:#111; border-radius:10px;">
         <b>${c.name}</b> - ${c.phone}<br><br>
+        Reminder: ${c.reminder || "Not set"}
 
         <button onclick="generateClientMessage('${c.name}', ${index})">Generate Msg</button>
         <button onclick="sendWhatsApp(${index})">Send</button>

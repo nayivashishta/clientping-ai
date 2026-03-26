@@ -176,9 +176,17 @@ function deleteClient(index) {
   loadClients();
 }
 // WHATSAPP
-function sendWhatsApp(phone) {
-  let msg = aiMessage.innerText;
-  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
+function sendWhatsApp(index) {
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+  let msg = document.getElementById(`msg-${index}`).innerText;
+
+  if (!msg) {
+    alert("Pehle message generate karo");
+    return;
+  }
+
+  window.open(`https://wa.me/${clients[index].phone}?text=${encodeURIComponent(msg)}`);
 }
 
 </script>

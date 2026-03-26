@@ -154,7 +154,14 @@ function generateMessage() {
 
   aiMessage.innerText = messages[Math.floor(Math.random()*messages.length)];
 }
+function deleteClient(index) {
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
 
+  clients.splice(index, 1);
+
+  localStorage.setItem("clients", JSON.stringify(clients));
+  loadClients();
+}
 // WHATSAPP
 function sendWhatsApp(phone) {
   let msg = aiMessage.innerText;

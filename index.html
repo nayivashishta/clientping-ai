@@ -1,1 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ClientPing AI</title>
+</head>
+<body>
 
+<h2>Login / Signup</h2>
+
+<input type="email" id="email" placeholder="Email"><br><br>
+<input type="password" id="password" placeholder="Password"><br><br>
+
+<button onclick="signup()">Sign Up</button>
+<button onclick="login()">Login</button>
+
+<p id="status"></p>
+
+<script type="module">
+
+// 🔥 IMPORTS
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// 🔥 FIREBASE CONFIG (yaha apna daalna)
+const firebaseConfig = {
+  apiKey: "AIzaSyA9gNoGmnrUF8GVi_4SxtTGJZUJNK3_iFg",
+  authDomain: "client-ping-ai.firebaseapp.com",
+  projectId: "client-ping-ai",
+  storageBucket: "client-ping-ai.firebasestorage.app",
+  messagingSenderId: "150192483890",
+  appId: "1:150192483890:web:1f1251a6b799f68c12962b",
+  measurementId: "G-Z9C3P9BLY2"
+};
+
+// 🔥 INIT
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// 🔥 SIGNUP
+window.signup = function () {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  createUserWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      document.getElementById("status").innerText = "Signup Successful";
+    })
+    .catch((e) => {
+      document.getElementById("status").innerText = e.message;
+    });
+};
+
+// 🔥 LOGIN
+window.login = function () {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  signInWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      document.getElementById("status").innerText = "Login Successful";
+    })
+    .catch((error) => {
+      document.getElementById("status").innerText = error.message;
+    });
+};
+
+</script>
+
+</body>
+</html>

@@ -87,6 +87,8 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
+let userPlan = localStorage.getItem("plan") || "free";
+  
 // AUTH
 function signup() {
   firebase.auth().createUserWithEmailAndPassword(email.value, password.value)
@@ -120,6 +122,11 @@ function logout() {
 function addClient() {
   let clients = JSON.parse(localStorage.getItem("clients")) || [];
 
+  if (userPlan === "free" && clients.length >= 3) {
+    alert("Free plan me sirf 3 clients allowed. Upgrade karo 🚀");
+    return;
+  }
+  
   clients.push({
   name: clientName.value,
   phone: clientPhone.value,

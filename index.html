@@ -14,25 +14,24 @@
 <button onclick="login()">Login</button>
 
 <p id="status"></p>
-  <div id="dashboard" style="display:none;">
+
+<div id="dashboard" style="display:none;">
   <h2>Welcome to ClientPing AI 🚀</h2>
   <button onclick="logout()">Logout</button>
-  </div>
+</div>
 
 <script type="module">
 
-// 🔥 IMPORTS
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 
 import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-onAuthStateChanged,
-  signOut 
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// 🔥 FIREBASE CONFIG (yaha apna daalna)
 const firebaseConfig = {
   apiKey: "AIzaSyA9gNoGmnrUF8GVi_4SxtTGJZUJNK3_iFg",
   authDomain: "client-ping-ai.firebaseapp.com",
@@ -43,11 +42,10 @@ const firebaseConfig = {
   measurementId: "G-Z9C3P9BLY2"
 };
 
-// 🔥 INIT
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// 🔥 SIGNUP
+// SIGNUP
 window.signup = function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -61,7 +59,7 @@ window.signup = function () {
     });
 };
 
-// 🔥 LOGIN
+// LOGIN
 window.login = function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -69,24 +67,27 @@ window.login = function () {
   signInWithEmailAndPassword(auth, email, password)
     .then(() => {
       document.getElementById("status").innerText = "Login Successful";
-    })
-   //
-  document.getElementById("dashboard").style.display = "block";
+      document.getElementById("dashboard").style.display = "block";
     })
     .catch((error) => {
       document.getElementById("status").innerText = error.message;
     });
 };
+
+// AUTO LOGIN
 onAuthStateChanged(auth, (user) => {
   if (user) {
     document.getElementById("dashboard").style.display = "block";
   }
 });
-  window.logout = function () {
+
+// LOGOUT
+window.logout = function () {
   signOut(auth).then(() => {
     document.getElementById("dashboard").style.display = "none";
   });
 };
+
 </script>
 
 </body>

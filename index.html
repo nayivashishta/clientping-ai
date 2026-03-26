@@ -67,6 +67,9 @@ window.login = function () {
   signInWithEmailAndPassword(auth, email, password)
     .then(() => {
       document.getElementById("status").innerText = "Login Successful";
+
+      // 🔥 UI switch
+      document.getElementById("authBox").style.display = "none";
       document.getElementById("dashboard").style.display = "block";
     })
     .catch((error) => {

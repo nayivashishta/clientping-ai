@@ -200,7 +200,9 @@ setInterval(() => {
 
   clients.forEach((c) => {
     if (c.reminder && c.reminder === now) {
-      alert(`⏰ Reminder: ${c.name} ko message bhejo!`);
+      let msg = `Hi ${c.name}, just checking in 😊`;
+
+      window.open(`https://wa.me/${c.phone}?text=${encodeURIComponent(msg)}`);
     }
   });
 }, 60000);

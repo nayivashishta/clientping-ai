@@ -127,16 +127,20 @@ function addClient() {
   localStorage.setItem("clients", JSON.stringify(clients));
   loadClients();
 }
-
+  
 function loadClients() {
   let clients = JSON.parse(localStorage.getItem("clients")) || [];
   clientList.innerHTML = "";
 
-  clients.forEach(c => {
+  clients.forEach((c, index) => {
     clientList.innerHTML += `
-      <p>${c.name} - ${c.phone}
-      <button onclick="sendWhatsApp('${c.phone}')">Send</button>
-      </p>`;
+      <div style="margin:10px; padding:10px; background:#111; border-radius:10px;">
+        <b>${c.name}</b> - ${c.phone}<br><br>
+
+        <button onclick="sendWhatsApp('${c.phone}')">Send</button>
+        <button onclick="deleteClient(${index})" style="background:red;">Delete</button>
+      </div>
+    `;
   });
 }
 

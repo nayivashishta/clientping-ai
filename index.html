@@ -3,31 +3,54 @@
 <head>
   <title>ClientPing AI</title>
   <style>
-    body { font-family: Arial; background:#0f172a; color:white; text-align:center; }
-    input, button { padding:10px; margin:5px; border-radius:8px; border:none; }
-    button { background:#2563eb; color:white; cursor:pointer; }
+    body {
+      font-family: Arial;
+      background: linear-gradient(135deg, #1e3a8a, #9333ea);
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 8px;
+      border: none;
+    }
+    button {
+      background: #22c55e;
+      color: white;
+      cursor: pointer;
+    }
+    .card {
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      margin: 10px;
+      border-radius: 12px;
+    }
     #dashboard { display:none; }
-    .card { background:#1e293b; padding:15px; margin:10px; border-radius:10px; }
   </style>
 </head>
 <body>
 
 <div id="authBox">
-  <h2>ClientPing AI 🔥</h2>
+  <h2>🔥 ClientPing AI</h2>
+
   <input type="email" id="email" placeholder="Email"><br>
   <input type="password" id="password" placeholder="Password"><br>
+
   <button onclick="signup()">Sign Up</button>
   <button onclick="login()">Login</button>
+
   <p id="status"></p>
 </div>
 
 <div id="dashboard">
-  <h2>Welcome 🚀</h2>
+  <h2>🚀 Dashboard</h2>
   <button onclick="logout()">Logout</button>
 
   <div class="card">
     <h3>Add Client</h3>
-    <input id="clientName" placeholder="Client Name">
+    <input id="clientName" placeholder="Name">
     <input id="clientPhone" placeholder="Phone">
     <button onclick="addClient()">Add</button>
   </div>
@@ -42,62 +65,58 @@
     <button onclick="generateMessage()">Generate</button>
     <p id="aiMessage"></p>
   </div>
-
-  <div class="card">
-    <h3>Plan</h3>
-    <p id="plan">Free Plan</p>
-    <button onclick="upgrade()">Upgrade (Demo)</button>
-  </div>
-
 </div>
 
-<script type="module">
+<!-- ✅ Firebase CDN (NO MODULE = NO ERROR) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+<script>
 
-// 🔥 YOUR CONFIG (already correct)
+// 
 const firebaseConfig = {
   apiKey: "AIzaSyA9gNoGmnrUF8GVi_4SxtTGJZUJNK3_iFg",
   authDomain: "client-ping-ai.firebaseapp.com",
   projectId: "client-ping-ai",
+  storageBucket: "client-ping-ai.firebasestorage.app",
+  messagingSenderId: "150192483890",
+  appId: "1:150192483890:web:1f1251a6b799f68c12962b",
+  measurementId: "G-Z9C3P9BLY2"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+firebase.initializeApp(firebaseConfig);
 
 // AUTH
-window.signup = function () {
-  createUserWithEmailAndPassword(auth, email.value, password.value)
-    .then(() => status.innerText = "Signup Success")
-    .catch(e => status.innerText = e.message);
-};
-
-window.login = function () {
-  signInWithEmailAndPassword(auth, email.value, password.value)
+function signup() {
+  firebase.auth().createUserWithEmailAndPassword(email.value, password.value)
     .then(() => {
-      status.innerText = "Login Success";
-      authBox.style.display = "none";
-      dashboard.style.display = "block";
+      status.innerText = "Signup Successful";
+    })
+    .catch(e => status.innerText = e.message);
+}
+
+function login() {
+  firebase.auth().signInWithEmailAndPassword(email.value, password.value)
+    .then(() => {
+      status.innerText = "Login Successful";
+
+      document.getElementById("authBox").style.display = "none";
+      document.getElementById("dashboard").style.display = "block";
+
       loadClients();
     })
     .catch(e => status.innerText = e.message);
-};
+}
 
-window.logout = function () {
-  signOut(auth).then(() => {
+function logout() {
+  firebase.auth().signOut().then(() => {
     dashboard.style.display = "none";
     authBox.style.display = "block";
   });
-};
+}
 
 // CLIENT SYSTEM
-window.addClient = function () {
+function addClient() {
   let clients = JSON.parse(localStorage.getItem("clients")) || [];
 
   clients.push({
@@ -107,7 +126,7 @@ window.addClient = function () {
 
   localStorage.setItem("clients", JSON.stringify(clients));
   loadClients();
-};
+}
 
 function loadClients() {
   let clients = JSON.parse(localStorage.getItem("clients")) || [];
@@ -122,27 +141,21 @@ function loadClients() {
 }
 
 // AI MESSAGE
-window.generateMessage = function () {
+function generateMessage() {
   let messages = [
     "Hello! Just checking in 😊",
     "Reminder for pending payment 💰",
     "Hope you're doing well!"
   ];
 
-  let msg = messages[Math.floor(Math.random()*messages.length)];
-  aiMessage.innerText = msg;
-};
+  aiMessage.innerText = messages[Math.floor(Math.random()*messages.length)];
+}
 
 // WHATSAPP
-window.sendWhatsApp = function (phone) {
-  let msg = document.getElementById("aiMessage").innerText;
+function sendWhatsApp(phone) {
+  let msg = aiMessage.innerText;
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
-};
-
-// PLAN
-window.upgrade = function () {
-  plan.innerText = "Pro Plan Activated 🚀";
-};
+}
 
 </script>
 

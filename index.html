@@ -80,6 +80,7 @@ window.login = function () {
 // AUTO LOGIN
 onAuthStateChanged(auth, (user) => {
   if (user) {
+    document.getElementById("authBox").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
   }
 });

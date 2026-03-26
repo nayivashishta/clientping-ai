@@ -192,6 +192,18 @@ function sendWhatsApp(index) {
   window.open(`https://wa.me/${clients[index].phone}?text=${encodeURIComponent(msg)}`);
 }
 
+// 🔥 REMINDER SYSTEM
+setInterval(() => {
+  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+  let now = new Date().toISOString().slice(0,16);
+
+  clients.forEach((c) => {
+    if (c.reminder && c.reminder === now) {
+      alert(`⏰ Reminder: ${c.name} ko message bhejo!`);
+    }
+  });
+}, 60000);
 </script>
 
 </body>

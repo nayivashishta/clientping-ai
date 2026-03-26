@@ -181,7 +181,7 @@ function loadClients() {
     clientList.innerHTML += `
       <div class="clientCard">
         <b>${c.name}</b> - ${c.phone}<br><br>
-        Reminder: ${c.reminder || "Not set"}
+        Reminder: ${c.reminder ? c.reminder : "Not set"}<br><br>
 
         <button onclick="generateClientMessage('${c.name}', ${index})">Generate Msg</button>
         <button onclick="sendWhatsApp(${index})">Send</button>

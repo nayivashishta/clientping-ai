@@ -137,13 +137,15 @@ function loadClients() {
       <div style="margin:10px; padding:10px; background:#111; border-radius:10px;">
         <b>${c.name}</b> - ${c.phone}<br><br>
 
-        <button onclick="sendWhatsApp('${c.phone}')">Send</button>
+        <button onclick="generateClientMessage('${c.name}', ${index})">Generate Msg</button>
+        <button onclick="sendWhatsApp(${index})">Send</button>
         <button onclick="deleteClient(${index})" style="background:red;">Delete</button>
+
+        <p id="msg-${index}"></p>
       </div>
     `;
   });
 }
-
 // AI MESSAGE
 function generateMessage() {
   let messages = [
@@ -154,6 +156,17 @@ function generateMessage() {
 
   aiMessage.innerText = messages[Math.floor(Math.random()*messages.length)];
 }
+  function generateClientMessage(name, index) {
+  let messages = [
+    `Hi ${name}, just checking in 😊`,
+    `Hello ${name}, reminder for pending work 💰`,
+    `Hey ${name}, hope you're doing well!`
+  ];
+
+  let msg = messages[Math.floor(Math.random()*messages.length)];
+
+  document.getElementById(`msg-${index}`).innerText = msg;
+  }
 function deleteClient(index) {
   let clients = JSON.parse(localStorage.getItem("clients")) || [];
 

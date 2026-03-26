@@ -27,8 +27,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import {
   getAuth,
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword
-  onAuthStateChanged,
+  signInWithEmailAndPassword,
+onAuthStateChanged,
   signOut 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -70,7 +70,8 @@ window.login = function () {
     .then(() => {
       document.getElementById("status").innerText = "Login Successful";
     })
-    document.getElementById("dashboard").style.display = "block";
+   //
+  document.getElementById("dashboard").style.display = "block";
     })
     .catch((error) => {
       document.getElementById("status").innerText = error.message;

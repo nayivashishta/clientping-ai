@@ -167,41 +167,49 @@ function logout() {
 
 // CLIENT SYSTEM
 function addClient() {
-  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+  const user = firebase.auth().currentUser;
 
-  if (userPlan === "free" && clients.length >= 3) {
-    alert("Free plan me sirf 3 clients allowed. Upgrade karo 🚀");
+  if (!user) {
+    alert("Login karo pehle");
     return;
   }
-  
-  clients.push({
-  name: clientName.value,
-  phone: clientPhone.value,
-  reminder: reminderTime.value
-});
 
-  localStorage.setItem("clients", JSON.stringify(clients));
-  loadClients();
+  db.collection("clients").add({
+    uid: user.uid,
+    name: clientName.value,
+    phone: clientPhone.value,
+    reminder: reminderTime.value
+  })
+  .then(() => {
+    loadClients();
+  });
 }
   
 function loadClients() {
-  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+  const user = firebase.auth().currentUser;
+
+  if (!user) return;
+
   clientList.innerHTML = "";
 
-  clients.forEach((c, index) => {
-    clientList.innerHTML += `
-      <div class="clientCard">
-        <b>${c.name}</b> - ${c.phone}<br><br>
-        Reminder: ${c.reminder ? c.reminder : "Not set"}<br><br>
+  db.collection("clients")
+    .where("uid", "==", user.uid)
+    .get()
+    .then((snapshot) => {
+      snapshot.forEach((doc, index) => {
+        let c = doc.data();
 
-        <button onclick="generateClientMessage('${c.name}', ${index})">Generate Msg</button>
-        <button onclick="sendWhatsApp(${index})">Send</button>
-        <button onclick="deleteClient(${index})" style="background:red;">Delete</button>
+        clientList.innerHTML += `
+          <div class="clientCard">
+            <b>${c.name}</b> - ${c.phone}<br>
+            ⏰ Reminder: ${c.reminder || "Not set"}<br><br>
 
-        <p id="msg-${index}"></p>
-      </div>
-    `;
-  });
+            <button onclick="generateClientMessage('${c.name}', ${index})">Generate Msg</button>
+            <button onclick="sendWhatsApp(${index})">Send</button>
+          </div>
+        `;
+      });
+    });
 }
 // AI MESSAGE
 function generateMessage() {

@@ -47,6 +47,7 @@
 <div id="dashboard">
   <h2>🚀 Dashboard</h2>
   <button onclick="logout()">Logout</button>
+  <button onclick="upgrade()">Upgrade to Pro 🚀</button>
 
   <div class="card">
     <h3>Add Client</h3>
@@ -199,6 +200,11 @@ function sendWhatsApp(index) {
   window.open(`https://wa.me/${clients[index].phone}?text=${encodeURIComponent(msg)}`);
 }
 
+function upgrade() {
+  localStorage.setItem("plan", "pro");
+  alert("Pro plan activated 🚀");
+}
+  
 // 🔥 REMINDER SYSTEM
 setInterval(() => {
   let clients = JSON.parse(localStorage.getItem("clients")) || [];

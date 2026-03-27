@@ -167,7 +167,7 @@ function login() {
       console.error(e);
     });
 }
-
+  
 function logout() {
   firebase.auth().signOut().then(() => {
     dashboard.style.display = "none";

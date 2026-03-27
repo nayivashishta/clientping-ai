@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>ClientPing AI</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <style>
   body {
     font-family: Arial;
@@ -85,6 +86,7 @@
   <h2>🚀 Dashboard</h2>
   <button onclick="logout()">Logout</button>
   <button onclick="upgrade()">Upgrade to Pro 🚀</button>
+  <button onclick="payNow()">Upgrade to Pro 💰</button>
 
   <div class="card">
   <h3>Add Client</h3>
@@ -263,6 +265,25 @@ function sendWhatsApp(index) {
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
 }
 
+  function payNow() {
+  var options = {
+    key: "rzp_test_123456789", // 👈 apna Razorpay key dalna
+    amount: 49900, // ₹499
+    currency: "INR",
+    name: "ClientPing AI",
+    description: "Pro Upgrade",
+    handler: function (response) {
+      alert("Payment Successful 🎉");
+
+      localStorage.setItem("plan", "pro");
+      location.reload();
+    }
+  };
+
+  var rzp = new Razorpay(options);
+  rzp.open();
+  }
+  
 function upgrade() {
   localStorage.setItem("plan", "pro");
   alert("Pro plan activated 🚀");

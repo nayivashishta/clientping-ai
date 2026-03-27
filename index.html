@@ -154,11 +154,18 @@ function signup() {
 }
 
 function login() {
-  firebase.auth().signInWithEmailAndPassword(email.value, password.value)
-    .then(() => {
-      status.innerText = "Login Successful";
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      document.getElementById("status").innerText = "Login Successful";
+      console.log("User:", userCredential.user);
     })
-    .catch(e => status.innerText = e.message);  
+    .catch((e) => {
+      document.getElementById("status").innerText = e.message;
+      console.error(e);
+    });
 }
 
 function logout() {

@@ -157,13 +157,6 @@ function login() {
   firebase.auth().signInWithEmailAndPassword(email.value, password.value)
     .then(() => {
       status.innerText = "Login Successful";
-
-      document.getElementById("authBox").style.display = "none";
-      document.getElementById("dashboard").style.display = "block";
-
-      loadClients();
-    } 
-    .catch(e => status.innerText = e.message);
 }
 
 function logout() {

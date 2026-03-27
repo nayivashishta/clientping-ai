@@ -1,119 +1,112 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>ClientPing AI</title>
-
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClientPing AI SaaS</title>
 
   <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <style>
-  body {
-    font-family: Arial;
-    background: #f8fafc;
-    color: #0f172a;
-    text-align: center;
-    padding: 20px;
-  }
-
-  h2 { color: #1e3a8a; }
-
-  input {
-    padding: 10px;
-    margin: 8px;
-    border-radius: 8px;
-    border: 1px solid #94a3b8;
-    background: #ffffff;
-    colour: #0f172a;
-    width: 220px;
-  }
-    input[type="datetime-local"]{
-    colour: #0f172a;
-  }
-    input:focus {
-    outline: none;
-    border: 1px solid #1e3a8a;
-    box-shadow: 0 0 5px rgba(30,58,138,0.3);
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6fb;
     }
-    
-  button {
-    padding: 10px 15px;
-    margin: 5px;
-    border-radius: 8px;
-    border: none;
-    background: #1e3a8a;
-    color: white;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-    button:hover {
-    background: #2563eb;
-  }
-    
-  .card {
-    background: white;
-    padding: 15px;
-    margin: 15px auto;
-    border-radius: 12px;
-    width: 260px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    width: 260px;
-  }
-
-  .clientCard {
-    background: #e0f2fe;
-    padding: 10px;
-    margin-top: 10px;
-    border-radius: 10px;
-    color: #0f172a;
-  }
-
-  #dashboard { display:none; }
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 20px;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+    h1, h2, h3 { color: #0a1f44; }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #0a1f44;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover { opacity: 0.9; }
+    .row { display: flex; gap: 10px; }
+    .hidden { display: none; }
+    .client {
+      border-bottom: 1px solid #eee;
+      padding: 10px 0;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-small {
+      width: auto;
+      padding: 6px 10px;
+      font-size: 12px;
+      margin-right: 5px;
+    }
   </style>
 </head>
-
 <body>
 
-<div id="authBox">
-  <h2>🔥 ClientPing AI</h2>
+<div class="container">
 
-  <input type="email" id="email" placeholder="Email"><br>
-  <input type="password" id="password" placeholder="Password"><br>
-
-  <button onclick="signup()">Sign Up</button>
-  <button onclick="login()">Login</button>
-
-  <p id="status"></p>
-</div>
-
-<div id="dashboard">
-  <h2>🚀 Dashboard</h2>
-
-  <button onclick="logout()">Logout</button>
-  <button onclick="upgrade()">Upgrade to Pro 🚀</button>
-  <button onclick="payNow()">Upgrade to Pro 💰</button>
-
-  <div class="card">
-    <h3>Add Client</h3>
-
-    <input id="clientName" placeholder="Enter Name"><br>
-    <input id="clientPhone" placeholder="Enter Phone"><br>
-    <input id="reminderTime" type="datetime-local" placeholder="Select Date & Time"><br>
-
-    <button onclick="addClient()">Add</button>
+  <!-- AUTH -->
+  <div id="authSection" class="card">
+    <h2>ClientPing AI Login</h2>
+    <input id="email" placeholder="Email" />
+    <input id="password" type="password" placeholder="Password" />
+    <button onclick="signup()">Signup</button>
+    <button onclick="login()">Login</button>
   </div>
 
-  <div class="card">
-    <h3>Clients</h3
-    <div id="clientList"></div>
+  <!-- APP -->
+  <div id="appSection" class="hidden">
+
+    <div class="card topbar">
+      <h2>Dashboard</h2>
+      <button onclick="logout()">Logout</button>
+    </div>
+
+    <!-- ADD CLIENT -->
+    <div class="card">
+      <h3>Add Client</h3>
+      <input id="clientName" placeholder="Client Name" />
+      <input id="clientPhone" placeholder="Phone" />
+      <input id="clientEmail" placeholder="Client Email" />
+      <input id="reminderTime" type="datetime-local" />
+      <button onclick="addClient()">Add Client</button>
+      <p id="planInfo"></p>
+      <button onclick="upgradePlan()">Upgrade to Pro</button>
+    </div>
+
+    <!-- CLIENT LIST -->
+    <div class="card">
+      <h3>Clients</h3>
+      <div id="clientList"></div>
+    </div>
+
   </div>
 </div>
 
 <script>
-
+// 🔥 Firebase Config (REPLACE YOUR KEYS)
 const firebaseConfig = {
   apiKey: "AIzaSyA9gNoGmnrUF8GVi_4SxtTGJZUJNK3_iFg",
   authDomain: "client-ping-ai.firebaseapp.com",
@@ -125,205 +118,149 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let clientsData = [];
+let currentUser = null;
+let userPlan = "free";
 
+// AUTH STATE
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    currentUser = user;
+    document.getElementById("authSection").classList.add("hidden");
+    document.getElementById("appSection").classList.remove("hidden");
+    await loadPlan();
+    loadClients();
+  } else {
+    document.getElementById("authSection").classList.remove("hidden");
+    document.getElementById("appSection").classList.add("hidden");
+  }
+});
+
+// AUTH FUNCTIONS
 function signup() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
-
   auth.createUserWithEmailAndPassword(email, password)
-    .then(() => {
-      status.innerText = "Signup Successful";
-    })
-    .catch(e => status.innerText = e.message);
+    .catch(err => alert(err.message));
 }
 
 function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
-
   auth.signInWithEmailAndPassword(email, password)
-    .then(() => {
-      status.innerText = "Login Successful";
-    })
-    .catch(e => status.innerText = e.message);
+    .catch(err => alert(err.message));
 }
 
 function logout() {
   auth.signOut();
 }
 
-/* ================= AUTH STATE ================= */
-
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    document.getElementById("authBox").style.display = "none";
-    document.getElementById("dashboard").style.display = "block";
-    loadClients();
+// PLAN
+async function loadPlan() {
+  const doc = await db.collection("users").doc(currentUser.uid).get();
+  if (doc.exists) {
+    userPlan = doc.data().plan || "free";
   } else {
-    document.getElementById("authBox").style.display = "block";
-    document.getElementById("dashboard").style.display = "none";
+    await db.collection("users").doc(currentUser.uid).set({ plan: "free" });
+    userPlan = "free";
   }
-});
-
-/* ================= PLAN ================= */
-
-function isProUser() {
-  return localStorage.getItem("plan") === "pro";
+  document.getElementById("planInfo").innerText = "Plan: " + userPlan;
 }
 
-/* ================= CLIENT ================= */
+// ADD CLIENT + REMINDER
+async function addClient() {
+  const name = document.getElementById("clientName").value;
+  const phone = document.getElementById("clientPhone").value;
+  const email = document.getElementById("clientEmail").value;
+  const reminderTime = document.getElementById("reminderTime").value;
 
-function addClient() {
-  const user = auth.currentUser;
-
-  if (!user) {
-    alert("Login karo pehle");
+  if (!name || !phone || !email || !reminderTime) {
+    alert("Please fill all fields");
     return;
   }
 
-  db.collection("clients")
-    .where("uid", "==", user.uid)
-    .get()
-    .then(snapshot => {
+  const snapshot = await db.collection("clients").where("uid","==",currentUser.uid).get();
 
-      if (!isProUser() && snapshot.size >= 3) {
-        alert("Free plan me sirf 3 clients allowed 😢 Upgrade karo!");
-        return;
-      }
-
-      db.collection("clients").add({
-        uid: user.uid,
-        name: clientName.value,
-        phone: clientPhone.value,
-        reminder: reminderTime.value
-      }).then(() => loadClients());
-
-    });
-}
-
-function loadClients() {
-  const user = auth.currentUser;
-  if (!user) return;
-
-  clientList.innerHTML = "";
-  clientsData = [];
-
-  db.collection("clients")
-    .where("uid", "==", user.uid)
-    .get()
-    .then(snapshot => {
-
-      snapshot.forEach((doc, index) => {
-        let c = doc.data();
-        c.id = doc.id;
-        clientsData[index] = c;
-
-        clientList.innerHTML += `
-          <div class="clientCard">
-            <b>${c.name}</b> - ${c.phone}<br>
-            ⏰ ${c.reminder || "No reminder"}<br><br>
-
-            <button onclick="generateClientMessage('${c.name}', ${index})">Generate Msg</button>
-            <button onclick="sendWhatsApp(${index})">Send</button>
-            <button onclick="deleteClient(${index})" style="background:red;">Delete</button>
-
-            <p id="msg-${index}"></p>
-          </div>
-        `;
-      });
-
-    });
-}
-
-/* ================= DELETE ================= */
-
-function deleteClient(index) {
-  let id = clientsData[index].id;
-
-  db.collection("clients").doc(id).delete()
-    .then(() => loadClients());
-}
-
-/* ================= WHATSAPP ================= */
-
-function sendWhatsApp(index) {
-  let msg = document.getElementById(`msg-${index}`).innerText;
-
-  if (!msg) {
-    alert("Pehle message generate karo");
+  if (userPlan === "free" && snapshot.size >= 3) {
+    alert("Upgrade to Pro to add more than 3 clients");
     return;
   }
 
-  let phone = clientsData[index].phone;
+  const clientRef = await db.collection("clients").add({
+    uid: currentUser.uid,
+    name,
+    phone,
+    email,
+    createdAt: new Date()
+  });
 
-  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
+  await db.collection("reminders").add({
+    uid: currentUser.uid,
+    clientId: clientRef.id,
+    clientName: name,
+    email: email,
+    scheduledTime: new Date(reminderTime),
+    status: "pending"
+  });
+
+  loadClients();
 }
 
-/* ================= AI MESSAGE ================= */
+// LOAD CLIENTS
+async function loadClients() {
+  const list = document.getElementById("clientList");
+  list.innerHTML = "";
 
-function generateClientMessage(name, index) {
-  let messages = [
-    `Hi ${name}, just checking in 😊`,
-    `Hello ${name}, reminder for pending work 💰`,
-    `Hey ${name}, hope you're doing well!`
-  ];
+  const snapshot = await db.collection("clients").where("uid","==",currentUser.uid).get();
 
-  let msg = messages[Math.floor(Math.random()*messages.length)];
-  document.getElementById(`msg-${index}`).innerText = msg;
+  snapshot.forEach(doc => {
+    const c = doc.data();
+
+    const div = document.createElement("div");
+    div.className = "client";
+
+    div.innerHTML = `
+      <b>${c.name}</b><br/>
+      ${c.phone} | ${c.email}<br/>
+      <button class="btn-small" onclick="deleteClient('${doc.id}')">Delete</button>
+      <button class="btn-small" onclick="sendWhatsApp('${c.phone}','${c.name}')">WhatsApp</button>
+      <button class="btn-small" onclick="generateAI('${c.name}')">AI Msg</button>
+    `;
+
+    list.appendChild(div);
+  });
 }
 
-/* ================= PAYMENT ================= */
-
-function payNow() {
-  var options = {
-    key: "rzp_test_123456789",
-    amount: 49900,
-    currency: "INR",
-    name: "ClientPing AI",
-    description: "Pro Upgrade",
-    handler: function () {
-      localStorage.setItem("plan", "pro");
-      alert("Pro Activated 🚀");
-    }
-  };
-
-  var rzp = new Razorpay(options);
-  rzp.open();
+// DELETE
+async function deleteClient(id) {
+  await db.collection("clients").doc(id).delete();
+  loadClients();
 }
 
-function upgrade() {
-  localStorage.setItem("plan", "pro");
-  alert("Pro Activated 🚀");
+// WHATSAPP
+function sendWhatsApp(phone, name) {
+  const url = `https://wa.me/${phone}?text=Hello ${name}, this is ClientPing AI`;
+  window.open(url, "_blank");
 }
 
-/* ================= REMINDER ================= */
+// AI MESSAGE
+function generateAI(name) {
+  const msg = `Hello ${name}, this is your automated AI reminder from ClientPing AI.`;
+  alert(msg);
+}
 
-setInterval(() => {
-  let now = new Date().toISOString().slice(0,16);
-
-  let user = auth.currentUser;
-  if (!user) return;
-
-  db.collection("clients")
-    .where("uid", "==", user.uid)
-    .get()
-    .then(snapshot => {
-      snapshot.forEach(doc => {
-        let c = doc.data();
-
-        if (c.reminder === now) {
-          window.open(`https://wa.me/${c.phone}?text=${encodeURIComponent("Reminder for your task")}`);
-        }
-      });
-    });
-
-}, 60000);
-
+// UPGRADE PLAN (Demo)
+function upgradePlan() {
+  alert("Redirecting to payment...");
+  setTimeout(async () => {
+    await db.collection("users").doc(currentUser.uid).set({ plan: "pro" });
+    userPlan = "pro";
+    document.getElementById("planInfo").innerText = "Plan: pro";
+    alert("Upgraded to Pro!");
+  }, 1500);
+}
 </script>
 
 </body>

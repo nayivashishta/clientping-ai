@@ -101,15 +101,20 @@
 
     <input id="clientName" placeholder="Enter Name"><br>
     <input id="clientPhone" placeholder="Enter Phone"><br>
-    <input id="reminderTime" type="datetime-local"><br>
+    <input id="reminderTime" type="datetime-local" placeholder="Select Date & Time"><br>
 
     <button onclick="addClient()">Add</button>
   </div>
 
   <div class="card">
-    <h3>Clients</h3>
+    <h3>Clients</h3
     <div id="clientList"></div>
   </div>
+    <div class="card">
+    <h3>AI Message</h3>
+    <button onclick="generateMessage()">Generate</button>
+    <p id="aiMessage"></p>
+    </div>
 </div>
 
 <script>

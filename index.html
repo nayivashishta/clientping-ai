@@ -202,6 +202,7 @@ function loadClients() {
       snapshot.forEach((doc, index) => {
         let c = doc.data();
         clientsData[index] = c;
+        c.id = doc.id;
 
         clientList.innerHTML += `
           <div class="clientCard">
@@ -240,12 +241,13 @@ function generateMessage() {
   document.getElementById(`msg-${index}`).innerText = msg;
   }
 function deleteClient(index) {
-  let clients = JSON.parse(localStorage.getItem("clients")) || [];
+  let id = clientsData[index].id;
 
-  clients.splice(index, 1);
-
-  localStorage.setItem("clients", JSON.stringify(clients));
-  loadClients();
+  db.collection("clients").doc(id).delete()
+    .then(() => {
+      alert("Client deleted ✅");
+      loadClients();
+    });
 }
 // WHATSAPP
 function sendWhatsApp(index) {

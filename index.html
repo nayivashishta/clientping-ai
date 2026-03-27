@@ -2,7 +2,14 @@
 <html>
 <head>
   <title>ClientPing AI</title>
+
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
   <style>
   body {
     font-family: Arial;
@@ -12,26 +19,14 @@
     padding: 20px;
   }
 
-  h2 {
-    color: #1e3a8a;
-  }
+  h2 { color: #1e3a8a; }
 
   input {
     padding: 10px;
     margin: 8px;
     border-radius: 8px;
     border: 1px solid #94a3b8;
-    background: #ffffff;
-    color: #0f172a;
     width: 220px;
-  }
-  input[type="datetime-local"] {
-    color: #0f172a;
-  }
-  input:focus {
-    outline: none;
-    border: 1px solid #1e3a8a;
-    box-shadow: 0 0 5px rgba(30,58,138,0.3);
   }
 
   button {
@@ -42,11 +37,6 @@
     background: #1e3a8a;
     color: white;
     cursor: pointer;
-    transition: 0.2s;
-  }
-
-  button:hover {
-    background: #2563eb;
   }
 
   .card {
@@ -54,8 +44,8 @@
     padding: 15px;
     margin: 15px auto;
     border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     width: 260px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   }
 
   .clientCard {
@@ -63,11 +53,12 @@
     padding: 10px;
     margin-top: 10px;
     border-radius: 10px;
-    color: #0f172a;
   }
-    #dashboard { display:none; }
+
+  #dashboard { display:none; }
   </style>
 </head>
+
 <body>
 
 <div id="authBox">
@@ -84,69 +75,50 @@
 
 <div id="dashboard">
   <h2>🚀 Dashboard</h2>
+
   <button onclick="logout()">Logout</button>
   <button onclick="upgrade()">Upgrade to Pro 🚀</button>
   <button onclick="payNow()">Upgrade to Pro 💰</button>
 
   <div class="card">
-  <h3>Add Client</h3>
+    <h3>Add Client</h3>
 
-  <p>Name</p>
-  <input id="clientName" placeholder="Enter Name">
+    <input id="clientName" placeholder="Enter Name"><br>
+    <input id="clientPhone" placeholder="Enter Phone"><br>
+    <input id="reminderTime" type="datetime-local"><br>
 
-  <p>Phone</p>
-  <input id="clientPhone" placeholder="Enter Phone">
-
-  <p>⏰ Reminder</p>
-  <input id="reminderTime" type="datetime-local" placeholder="Select Date & Time">
-
-  <br>
-  <button onclick="addClient()">Add</button>
+    <button onclick="addClient()">Add</button>
   </div>
 
   <div class="card">
     <h3>Clients</h3>
     <div id="clientList"></div>
   </div>
-
-  <div class="card">
-    <h3>AI Message</h3>
-    <button onclick="generateMessage()">Generate</button>
-    <p id="aiMessage"></p>
-  </div>
 </div>
 
-<!-- ✅ Firebase CDN (NO MODULE = NO ERROR) -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <script>
 
-// 
 const firebaseConfig = {
-  apiKey: "AIzaSyA9gNoGmnrUF8GVi_4SxtTGJZUJNK3_iFg",
-  authDomain: "client-ping-ai.firebaseapp.com",
-  projectId: "client-ping-ai",
-  storageBucket: "client-ping-ai.firebasestorage.app",
-  messagingSenderId: "150192483890",
-  appId: "1:150192483890:web:1f1251a6b799f68c12962b",
-  measurementId: "G-Z9C3P9BLY2"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  appId: "YOUR_APP_ID"
 };
 
 firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
 const db = firebase.firestore();
 
 let clientsData = [];
 
-function isProUser() {
-  return localStorage.getItem("plan") === "pro";
-  }
+/* ================= AUTH ================= */
 
-let userPlan = localStorage.getItem("plan") || "free";
-  
-// AUTH
 function signup() {
-  firebase.auth().createUserWithEmailAndPassword(email.value, password.value)
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  auth.createUserWithEmailAndPassword(email, password)
     .then(() => {
       status.innerText = "Signup Successful";
     })
@@ -157,27 +129,40 @@ function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  firebase.auth().signInWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      document.getElementById("status").innerText = "Login Successful";
-      console.log("User:", userCredential.user);
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      status.innerText = "Login Successful";
     })
-    .catch((e) => {
-      document.getElementById("status").innerText = e.message;
-      console.error(e);
-    });
-}
-  
-function logout() {
-  firebase.auth().signOut().then(() => {
-    dashboard.style.display = "none";
-    authBox.style.display = "block";
-  });
+    .catch(e => status.innerText = e.message);
 }
 
-// CLIENT SYSTEM
+function logout() {
+  auth.signOut();
+}
+
+/* ================= AUTH STATE ================= */
+
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    document.getElementById("authBox").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+    loadClients();
+  } else {
+    document.getElementById("authBox").style.display = "block";
+    document.getElementById("dashboard").style.display = "none";
+  }
+});
+
+/* ================= PLAN ================= */
+
+function isProUser() {
+  return localStorage.getItem("plan") === "pro";
+}
+
+/* ================= CLIENT ================= */
+
 function addClient() {
-  const user = firebase.auth().currentUser;
+  const user = auth.currentUser;
 
   if (!user) {
     alert("Login karo pehle");
@@ -185,27 +170,27 @@ function addClient() {
   }
 
   db.collection("clients")
-  .where("uid", "==", user.uid)
-  .get()
-  .then((snapshot) => {
-  if (!isProUser() && snapshot.size >= 3) {
+    .where("uid", "==", user.uid)
+    .get()
+    .then(snapshot => {
+
+      if (!isProUser() && snapshot.size >= 3) {
         alert("Free plan me sirf 3 clients allowed 😢 Upgrade karo!");
         return;
-  }
-  db.collection("clients").add({
-    uid: user.uid,
-    name: clientName.value,
-    phone: clientPhone.value,
-    reminder: reminderTime.value
-  })
-  .then(() => {
-    loadClients();
-  });
-});
-  
-function loadClients() {
-  const user = firebase.auth().currentUser;
+      }
 
+      db.collection("clients").add({
+        uid: user.uid,
+        name: clientName.value,
+        phone: clientPhone.value,
+        reminder: reminderTime.value
+      }).then(() => loadClients());
+
+    });
+}
+
+function loadClients() {
+  const user = auth.currentUser;
   if (!user) return;
 
   clientList.innerHTML = "";
@@ -214,16 +199,17 @@ function loadClients() {
   db.collection("clients")
     .where("uid", "==", user.uid)
     .get()
-    .then((snapshot) => {
+    .then(snapshot => {
+
       snapshot.forEach((doc, index) => {
         let c = doc.data();
-        clientsData[index] = c;
         c.id = doc.id;
+        clientsData[index] = c;
 
         clientList.innerHTML += `
           <div class="clientCard">
             <b>${c.name}</b> - ${c.phone}<br>
-            ⏰ Reminder: ${c.reminder || "Not set"}<br><br>
+            ⏰ ${c.reminder || "No reminder"}<br><br>
 
             <button onclick="generateClientMessage('${c.name}', ${index})">Generate Msg</button>
             <button onclick="sendWhatsApp(${index})">Send</button>
@@ -233,39 +219,21 @@ function loadClients() {
           </div>
         `;
       });
+
     });
 }
-// AI MESSAGE
-function generateMessage() {
-  let messages = [
-    "Hello! Just checking in 😊",
-    "Reminder for pending payment 💰",
-    "Hope you're doing well!"
-  ];
 
-  aiMessage.innerText = messages[Math.floor(Math.random()*messages.length)];
-}
-  function generateClientMessage(name, index) {
-  let messages = [
-    `Hi ${name}, just checking in 😊`,
-    `Hello ${name}, reminder for pending work 💰`,
-    `Hey ${name}, hope you're doing well!`
-  ];
+/* ================= DELETE ================= */
 
-  let msg = messages[Math.floor(Math.random()*messages.length)];
-
-  document.getElementById(`msg-${index}`).innerText = msg;
-  }
 function deleteClient(index) {
   let id = clientsData[index].id;
 
   db.collection("clients").doc(id).delete()
-    .then(() => {
-      alert("Client deleted ✅");
-      loadClients();
-    });
+    .then(() => loadClients());
 }
-// WHATSAPP
+
+/* ================= WHATSAPP ================= */
+
 function sendWhatsApp(index) {
   let msg = document.getElementById(`msg-${index}`).innerText;
 
@@ -279,56 +247,66 @@ function sendWhatsApp(index) {
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
 }
 
-firebase.auth().onAuthStateChanged((user) => {
-  if (user) {
-    document.getElementById("authBox").style.display = "none";
-    document.getElementById("dashboard").style.display = "block";
+/* ================= AI MESSAGE ================= */
 
-    loadClients();
-  } else {
-    document.getElementById("authBox").style.display = "block";
-    document.getElementById("dashboard").style.display = "none";
-  }
-});
-  
-  function payNow() {
+function generateClientMessage(name, index) {
+  let messages = [
+    `Hi ${name}, just checking in 😊`,
+    `Hello ${name}, reminder for pending work 💰`,
+    `Hey ${name}, hope you're doing well!`
+  ];
+
+  let msg = messages[Math.floor(Math.random()*messages.length)];
+  document.getElementById(`msg-${index}`).innerText = msg;
+}
+
+/* ================= PAYMENT ================= */
+
+function payNow() {
   var options = {
-    key: "rzp_test_123456789", // 👈 apna Razorpay key dalna
-    amount: 49900, // ₹499
+    key: "rzp_test_123456789",
+    amount: 49900,
     currency: "INR",
     name: "ClientPing AI",
     description: "Pro Upgrade",
-    handler: function (response) {
-      alert("Payment Successful 🎉");
-
+    handler: function () {
       localStorage.setItem("plan", "pro");
-      location.reload();
+      alert("Pro Activated 🚀");
     }
   };
 
   var rzp = new Razorpay(options);
   rzp.open();
-  }
-  
+}
+
 function upgrade() {
   localStorage.setItem("plan", "pro");
-  alert("Pro plan activated 🚀");
+  alert("Pro Activated 🚀");
 }
-  
-// 🔥 REMINDER SYSTEM
-setInterval(() => {
-  let clients = JSON.parse(localStorage.getItem("clients")) || [];
 
+/* ================= REMINDER ================= */
+
+setInterval(() => {
   let now = new Date().toISOString().slice(0,16);
 
-  clients.forEach((c) => {
-    if (c.reminder && c.reminder === now) {
-      let msg = `Hi ${c.name}, just checking in 😊`;
+  let user = auth.currentUser;
+  if (!user) return;
 
-      window.open(`https://wa.me/${c.phone}?text=${encodeURIComponent(msg)}`);
-    }
-  });
+  db.collection("clients")
+    .where("uid", "==", user.uid)
+    .get()
+    .then(snapshot => {
+      snapshot.forEach(doc => {
+        let c = doc.data();
+
+        if (c.reminder === now) {
+          window.open(`https://wa.me/${c.phone}?text=${encodeURIComponent("Reminder for your task")}`);
+        }
+      });
+    });
+
 }, 60000);
+
 </script>
 
 </body>

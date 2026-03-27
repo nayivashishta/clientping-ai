@@ -157,10 +157,8 @@ function login() {
   firebase.auth().signInWithEmailAndPassword(email.value, password.value)
     .then(() => {
       status.innerText = "Login Successful";
-})
-    .catch((e) => {
-      status.innerText = e.message;
-    });
+    })
+    .catch(e => status.innerText = e.message);  
 }
 
 function logout() {

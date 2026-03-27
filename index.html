@@ -162,7 +162,11 @@ function login() {
       document.getElementById("dashboard").style.display = "block";
 
       loadClients();
-    })
+    } else {
+    document.getElementById("authBox").style.display = "block";
+    document.getElementById("dashboard").style.display = "none";
+  }
+});
     .catch(e => status.innerText = e.message);
 }
 

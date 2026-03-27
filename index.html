@@ -157,6 +157,10 @@ function login() {
   firebase.auth().signInWithEmailAndPassword(email.value, password.value)
     .then(() => {
       status.innerText = "Login Successful";
+})
+    .catch((e) => {
+      status.innerText = e.message;
+    });
 }
 
 function logout() {
@@ -270,6 +274,18 @@ function sendWhatsApp(index) {
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
 }
 
+firebase.auth().onAuthStateChanged((user) => {
+  if (user) {
+    document.getElementById("authBox").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+
+    loadClients();
+  } else {
+    document.getElementById("authBox").style.display = "block";
+    document.getElementById("dashboard").style.display = "none";
+  }
+});
+  
   function payNow() {
   var options = {
     key: "rzp_test_123456789", // 👈 apna Razorpay key dalna

@@ -182,7 +182,10 @@ function addClient() {
     return;
   }
 
-  if (!isProUser() && clientsData.length >= 3) {
+  db.collection("clients")
+  .where("uid", "==", user.uid)
+  .get()
+  .then((snapshot) => {
   alert("Free plan me sirf 3 clients allowed 😢 Upgrade karo!");
   return;
   }

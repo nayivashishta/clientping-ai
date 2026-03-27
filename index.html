@@ -134,6 +134,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+let clientsData = [];
+
 let userPlan = localStorage.getItem("plan") || "free";
   
 // AUTH
@@ -199,6 +201,8 @@ function loadClients() {
       snapshot.forEach((doc, index) => {
         let c = doc.data();
 
+        clientsData[index] = c;
+
         clientList.innerHTML += `
           <div class="clientCard">
             <b>${c.name}</b> - ${c.phone}<br>
@@ -242,8 +246,6 @@ function deleteClient(index) {
 }
 // WHATSAPP
 function sendWhatsApp(index) {
-  let clients = JSON.parse(localStorage.getItem("clients")) || [];
-
   let msg = document.getElementById(`msg-${index}`).innerText;
 
   if (!msg) {
@@ -251,7 +253,9 @@ function sendWhatsApp(index) {
     return;
   }
 
-  window.open(`https://wa.me/${clients[index].phone}?text=${encodeURIComponent(msg)}`);
+  let phone = clientsData[index].phone;
+
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
 }
 
 function upgrade() {

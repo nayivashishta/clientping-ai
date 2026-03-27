@@ -26,9 +26,19 @@
     margin: 8px;
     border-radius: 8px;
     border: 1px solid #94a3b8;
+    background: #ffffff;
+    colour: #0f172a;
     width: 220px;
   }
-
+    input[type="datetime-local"]{
+    colour: #0f172a;
+  }
+    input:focus {
+    outline: none;
+    border: 1px solid #1e3a8a;
+    box-shadow: 0 0 5px rgba(30,58,138,0.3);
+    }
+    
   button {
     padding: 10px 15px;
     margin: 5px;
@@ -37,8 +47,12 @@
     background: #1e3a8a;
     color: white;
     cursor: pointer;
+    transition: 0.2s;
   }
-
+    button:hover {
+    background: #2563eb;
+  }
+    
   .card {
     background: white;
     padding: 15px;
@@ -46,6 +60,7 @@
     border-radius: 12px;
     width: 260px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    width: 260px;
   }
 
   .clientCard {
@@ -53,6 +68,7 @@
     padding: 10px;
     margin-top: 10px;
     border-radius: 10px;
+    color: #0f172a;
   }
 
   #dashboard { display:none; }

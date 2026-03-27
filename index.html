@@ -193,6 +193,7 @@ function loadClients() {
   if (!user) return;
 
   clientList.innerHTML = "";
+  clientsData = [];
 
   db.collection("clients")
     .where("uid", "==", user.uid)
@@ -200,7 +201,6 @@ function loadClients() {
     .then((snapshot) => {
       snapshot.forEach((doc, index) => {
         let c = doc.data();
-
         clientsData[index] = c;
 
         clientList.innerHTML += `
@@ -210,6 +210,9 @@ function loadClients() {
 
             <button onclick="generateClientMessage('${c.name}', ${index})">Generate Msg</button>
             <button onclick="sendWhatsApp(${index})">Send</button>
+            <button onclick="deleteClient(${index})" style="background:red;">Delete</button>
+
+            <p id="msg-${index}"></p>
           </div>
         `;
       });

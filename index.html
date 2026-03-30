@@ -243,6 +243,7 @@ const msg=generateSmartMessage(r.clientName,r.scheduledTime);
 window.open(`https://wa.me/${r.phone}?text=${encodeURIComponent(msg)}`);
 
 await db.collection("reminders").doc(doc.id)
+  uid: currentUser.uid,
 .update({status:"sent"});
 }
 });

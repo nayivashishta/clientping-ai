@@ -117,6 +117,15 @@ auth.onAuthStateChanged(async user => {
 
 function signup() {
   auth.createUserWithEmailAndPassword(email.value, password.value)
+    .then(async (userCred) => {
+
+      await db.collection("users").doc(userCred.user.uid).set({
+        plan: "free",
+        createdAt: new Date()
+      });
+
+      alert("Signup Successful");
+    })
     .catch(e => alert(e.message));
 }
 
@@ -159,7 +168,8 @@ async function addClient() {
     clientId:clientRef.id,
     clientName:name,
     email:emailVal,
-    scheduledTime:new Date(time),
+    createdAt: new Date()
+    scheduledTime: new Date(time).toISOString()
     status:"pending"
   });
 
@@ -204,7 +214,11 @@ async function loadClients() {
 }
 
 async function deleteClient(id) {
+  await db.collection("reminders").doc(doc.id).delete();
+  });
+
   await db.collection("clients").doc(id).delete();
+  
   loadClients();
 }
 

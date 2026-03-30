@@ -249,22 +249,36 @@ await db.collection("reminders").doc(doc.id)
 
 }
 
-// DELETE
 async function deleteClient(id){
 
-const snap=await db.collection("reminders")
-.where("clientId","==",id).get();
+  try {
 
-snap.forEach(async d=>{
-await db.collection("reminders").doc(d.id).delete();
-});
+    // 1. Get all reminders
+    const snap = await db.collection("reminders")
+      .where("clientId","==",id)
+      .get();
 
-await db.collection("clients").doc(id).delete();
+    // 2. Delete all reminders properly
+    const promises = snap.docs.map(doc =>
+      db.collection("reminders").doc(doc.id).delete()
+    );
 
-loadClients();
+    await Promise.all(promises);
+
+    // 3. Delete client
+    await db.collection("clients").doc(id).delete();
+
+    // 4. Reload UI
+    loadClients();
+
+    alert("Client deleted successfully");
+
+  } catch (err) {
+    console.error(err);
+    alert("Delete failed");
+  }
 }
-
-// WHATSAPP
+  
 function sendWhatsApp(phone,msg){
 window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
 }

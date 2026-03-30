@@ -253,29 +253,25 @@ async function deleteClient(id){
 
   try {
 
-    // 1. Get all reminders
+    // Get reminders of that client
     const snap = await db.collection("reminders")
       .where("clientId","==",id)
       .get();
 
-    // 2. Delete all reminders properly
-    const promises = snap.docs.map(doc =>
-      db.collection("reminders").doc(doc.id).delete()
-    );
+    // Delete one by one safely
+    for (const doc of snap.docs) {
+      await db.collection("reminders").doc(doc.id).delete();
+    }
 
-    await Promise.all(promises);
-
-    // 3. Delete client
+    // Delete client
     await db.collection("clients").doc(id).delete();
 
-    // 4. Reload UI
+    alert("Deleted successfully");
     loadClients();
 
-    alert("Client deleted successfully");
-
   } catch (err) {
-    console.error(err);
-    alert("Delete failed");
+    console.error("DELETE ERROR:", err);
+    alert("Delete failed: " + err.message);
   }
 }
   

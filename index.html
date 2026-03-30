@@ -1,1 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ClientPing AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+body {
+  margin:0;
+  font-family: 'Segoe UI', sans-serif;
+  background:#f4f7fb;
+}
+
+.sidebar {
+  width:230px;
+  height:100vh;
+  background:#0a1f44;
+  color:white;
+  position:fixed;
+  padding:20px;
+}
+
+.sidebar h2 {margin-bottom:30px;}
+
+.sidebar button {
+  width:100%;
+  margin:10px 0;
+  padding:12px;
+  border:none;
+  background:#1e3a8a;
+  color:white;
+  cursor:pointer;
+  border-radius:8px;
+}
+
+.main {
+  margin-left:250px;
+  padding:20px;
+}
+
+.card {
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  margin-top:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+
+input {
+  padding:10px;
+  margin:5px;
+  border-radius:8px;
+  border:1px solid #ddd;
+}
+
+.btn {
+  background:#0a1f44;
+  color:white;
+  border:none;
+  padding:10px 15px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.hero {
+  font-size:22px;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+.tagline {
+  color:gray;
+  margin-bottom:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2>ClientPing AI</h2>
+  <button onclick="showDashboard()">Dashboard</button>
+  <button onclick="logout()">Logout</button>
+</div>
+
+<div class="main">
+
+<div id="auth">
+  <h2>Login / Signup</h2>
+  <input id="email" placeholder="Email"><br>
+  <input id="password" type="password" placeholder="Password"><br>
+  <button class="btn" onclick="signup()">Signup</button>
+  <button class="btn" onclick="login()">Login</button>
+</div>
+
+<div id="dashboard" style="display:none;">
+  <div class="hero">Never lose a client again 🚀</div>
+  <div class="tagline">AI follow-ups. Smart reminders. More deals.</div>
+
+  <input id="name" placeholder="Client Name">
+  <input id="phone" placeholder="Phone">
+  <input id="date" type="date">
+
+  <button class="btn" onclick="addClient()">Add Client</button>
+
+  <div id="stats"></div>
+  <div id="clients"></div>
+
+  <h3>AI Message</h3>
+  <p id="aiMessage"></p>
+  <button class="btn" onclick="generateMessage()">Generate</button>
+</div>
+
+</div>
+
+<script>
+const SUPABASE_URL = aeprgqutctiiwdmnsyxv
+const SUPABASE_KEY = https://aeprgqutctiiwdmnsyxv.supabase.co
+
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+
+// AUTH
+async function signup() {
+  const { error } = await supabase.auth.signUp({
+    email: email.value,
+    password: password.value
+  });
+  alert(error ? error.message : "Signup success");
+}
+
+async function login() {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email.value,
+    password: password.value
+  });
+
+  if (error) return alert(error.message);
+
+  currentUser = data.user;
+  initApp();
+}
+
+async function logout() {
+  await supabase.auth.signOut();
+  location.reload();
+}
+
+// INIT
+async function initApp() {
+  document.getElementById("auth").style.display="none";
+  document.getElementById("dashboard").style.display="block";
+  loadClients();
+}
+
+// ADD CLIENT
+async function addClient() {
+  if (!name.value || !phone.value) return alert("Fill all");
+
+  await supabase.from("clients").insert([{
+    user_id: currentUser.id,
+    name: name.value,
+    phone: phone.value,
+    date: date.value
+  }]);
+
+  loadClients();
+}
+
+// LOAD CLIENTS
+async function loadClients() {
+  const { data } = await supabase
+    .from("clients")
+    .select("*")
+    .eq("user_id", currentUser.id);
+
+  let html = "";
+  let today = new Date();
+
+  let total = data.length;
+  let pending = 0;
+
+  data.forEach(c => {
+    let d = new Date(c.date);
+    let status = "";
+
+    if (d < today) {
+      status = "🔴 Overdue";
+      pending++;
+    } else {
+      status = "🟢 Upcoming";
+    }
+
+    html += `
+      <div class="card">
+        <b>${c.name}</b><br>
+        ${c.phone}<br>
+        ${c.date}<br>
+        ${status}<br>
+        <button onclick="deleteClient(${c.id})">Delete</button>
+        <button onclick="sendWhatsApp('${c.phone}')">WhatsApp</button>
+      </div>
+    `;
+  });
+
+  document.getElementById("clients").innerHTML = html;
+
+  document.getElementById("stats").innerHTML =
+    `Total: ${total} | Pending: ${pending}`;
+}
+
+// DELETE
+async function deleteClient(id) {
+  await supabase.from("clients").delete().eq("id", id);
+  loadClients();
+}
+
+// AI MESSAGE
+async function generateMessage() {
+  const { data } = await supabase.from("clients")
+    .select("*")
+    .eq("user_id", currentUser.id);
+
+  let msg = "";
+
+  data.forEach(c => {
+    let today = new Date();
+    let d = new Date(c.date);
+
+    if (d < today) {
+      msg += `Hey ${c.name}, let's close this today 🔥\n`;
+    } else {
+      msg += `Hi ${c.name}, just checking in 😊\n`;
+    }
+  });
+
+  document.getElementById("aiMessage").innerText = msg;
+}
+
+// WHATSAPP
+function sendWhatsApp(phone) {
+  let text = encodeURIComponent(
+    document.getElementById("aiMessage").innerText
+  );
+  window.open(`https://wa.me/${phone}?text=${text}`);
+}
+
+// SESSION AUTO LOGIN
+supabase.auth.getSession().then(({data}) => {
+  if (data.session) {
+    currentUser = data.session.user;
+    initApp();
+  }
+});
+</script>
+
+</body>
+</html>

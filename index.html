@@ -213,6 +213,30 @@ async function loadClients() {
   document.getElementById("totalReminders").innerText = rem.size + " Reminders";
 }
 
+async function checkReminders() {
+  const now = new Date().toISOString();
+
+  const snap = await db.collection("reminders")
+    .where("uid", "==", currentUser.uid)
+    .where("status", "==", "pending")
+    .get();
+
+  snap.forEach(async (doc) => {
+    const r = doc.data();
+
+    if (r.scheduledTime <= now) {
+
+      const msg = `Hi ${r.clientName}, reminder for pending work.`;
+
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+
+      await db.collection("reminders").doc(doc.id).update({
+        status: "sent"
+      });
+    }
+  });
+}
+
 async function deleteClient(id) {
   await db.collection("reminders").doc(doc.id).delete();
   });

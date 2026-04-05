@@ -1053,18 +1053,19 @@ Rules:
 - Output ONLY the message text, nothing else`;
  
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('https://aeprgqutctiiwdmnsyxv.supabase.co/functions/v1/generate-message', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+  "Content-Type": "application/json"
+},
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
+          name: client.name,
+             daysGap: 10
+})
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error.message);
-    AI_MESSAGES[clientId] = data.content[0].text.trim();
+    AI_MESSAGES[clientId] = data.message;
   } catch (e) {
     AI_MESSAGES[clientId] = 'Could not generate message. Please try again.';
   }

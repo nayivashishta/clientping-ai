@@ -1059,8 +1059,8 @@ Rules:
   "Content-Type": "application/json"
 },
       body: JSON.stringify({
-  prompt: prompt
-
+  name: client.name,
+  daysGap: 10
 })
     });
     const data = await res.json();

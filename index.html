@@ -1343,11 +1343,40 @@ function renderClientsTable() {
 // ═══════════════════════════════════════════════
 //  CLIENT ACTIONS
 // ═══════════════════════════════════════════════
-function sendWhatsApp(clientId) {
+async function sendWhatsApp(clientId) {
   const client = currentClients.find(c => c.id === clientId);
   if (!client) return;
-  const phone  = (client.phone || '').replace(/\D/g, '');
-  const msg    = AI_MESSAGES[clientId] || `Hey ${client.name}, just following up on our last discussion! Let me know your thoughts.`;
+
+  const phone = (client.phone || '').replace(/\D/g, '');
+
+  let msg = AI_MESSAGES[clientId];
+
+  // 🔥 Agar AI message nahi hai → generate karo
+  if (!msg) {
+    try {
+      const res = await fetch("https://aeprgqutctiiwdmnsyxv.supabase.co/functions/v1/generate-message", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: client.name,
+          daysGap: 10
+        })
+      });
+
+      const data = await res.json();
+      msg = data.message;
+
+      // Save for future
+      AI_MESSAGES[clientId] = msg;
+
+    } catch (e) {
+      console.error(e);
+      msg = `Hey ${client.name}, just following up 😊`;
+    }
+  }
+
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
 }
  

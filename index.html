@@ -1064,12 +1064,20 @@ Rules:
 })
     });
     const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
-    AI_MESSAGES[clientId] = data.message;
+
+    console.log("AI RESPONSE:", data);
+    
+    if (data && data.message) {
+      AI_MESSAGES[clientId] = data.message;
+    } else {
+      AI_MESSAGES[clientId] = "AI failed";
+    }
+
   } catch (e) {
-    AI_MESSAGES[clientId] = 'Could not generate message. Please try again.';
+    console.error(e);
+    AI_MESSAGES[clientId] = "Error generating message";
   }
- 
+
   AI_LOADING[clientId] = false;
   renderClientsTable();
 }

@@ -1,1562 +1,325 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ClientPing AI — Never Lose a Client Again</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<title>ClientPing AI Pro</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <style>
-  /* ═══════════════════════════════════════════════
-     RESET & BASE
-  ═══════════════════════════════════════════════ */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 16px; }
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: #F0F4F8;
-    color: #1E293B;
-    min-height: 100vh;
-  }
+body { margin:0; font-family:Arial; display:flex; background:#f4f6fb; }
 
-  /* ═══════════════════════════════════════════════
-     CSS VARIABLES
-  ═══════════════════════════════════════════════ */
-  :root {
-    --navy:        #0F1B3D;
-    --navy-light:  #1A2D5A;
-    --navy-mid:    #243870;
-    --accent:      #3B82F6;
-    --accent-dark: #2563EB;
-    --accent-bg:   #EFF6FF;
-    --accent-border: #BFDBFE;
-    --success:     #10B981;
-    --success-bg:  #DCFCE7;
-    --success-txt: #166534;
-    --warning:     #F59E0B;
-    --warning-bg:  #FFFBEB;
-    --warning-txt: #92400E;
-    --danger:      #EF4444;
-    --danger-bg:   #FEF2F2;
-    --danger-txt:  #991B1B;
-    --white:       #FFFFFF;
-    --gray-50:     #F8FAFC;
-    --gray-100:    #F1F5F9;
-    --gray-200:    #E2E8F0;
-    --gray-300:    #CBD5E1;
-    --gray-400:    #94A3B8;
-    --gray-500:    #64748B;
-    --gray-700:    #334155;
-    --gray-900:    #0F172A;
-    --radius:      8px;
-    --radius-lg:   12px;
-    --radius-xl:   16px;
-    --shadow:      0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-lg:   0 10px 30px rgba(0,0,0,0.12);
-    --transition:  all 0.18s ease;
-  }
+.sidebar {
+  width:220px; background:#1e3a8a; color:white; height:100vh; padding:20px;
+}
 
-  /* ═══════════════════════════════════════════════
-     ANIMATIONS
-  ═══════════════════════════════════════════════ */
-  @keyframes fadeInUp  { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes fadeIn    { from { opacity:0; } to { opacity:1; } }
-  @keyframes spin      { to { transform: rotate(360deg); } }
-  @keyframes pulse     { 0%,100%{opacity:1} 50%{opacity:.5} }
-  @keyframes slideIn   { from { opacity:0; transform:scale(0.96) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+.sidebar button {
+  width:100%; margin-top:10px; padding:10px;
+  border:none; background:white; color:#1e3a8a; border-radius:6px;
+}
 
-  /* ═══════════════════════════════════════════════
-     AUTH PAGE
-  ═══════════════════════════════════════════════ */
-  #auth-page {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #1E3A6E 100%);
-    padding: 20px;
-    animation: fadeIn 0.4s ease;
-  }
-  .auth-card {
-    background: var(--white);
-    border-radius: var(--radius-xl);
-    padding: 40px;
-    width: 100%;
-    max-width: 420px;
-    box-shadow: var(--shadow-lg);
-    animation: fadeInUp 0.5s ease;
-  }
-  .auth-logo {
-    text-align: center;
-    margin-bottom: 28px;
-  }
-  .auth-logo-text {
-    font-size: 26px;
-    font-weight: 900;
-    color: var(--navy);
-    letter-spacing: -0.5px;
-  }
-  .auth-logo-text span { color: var(--accent); }
-  .auth-tagline {
-    font-size: 13px;
-    color: var(--gray-500);
-    margin-top: 5px;
-  }
-  .tab-group {
-    display: flex;
-    background: var(--gray-100);
-    border-radius: var(--radius);
-    padding: 4px;
-    margin-bottom: 24px;
-  }
-  .tab-btn {
-    flex: 1;
-    padding: 9px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    font-family: 'DM Sans', sans-serif;
-    background: transparent;
-    color: var(--gray-500);
-    transition: var(--transition);
-  }
-  .tab-btn.active {
-    background: var(--white);
-    color: var(--navy);
-    font-weight: 700;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-  }
-  .form-group { margin-bottom: 16px; }
-  .form-label {
-    display: block;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--gray-700);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
-  }
-  .form-input {
-    width: 100%;
-    padding: 10px 13px;
-    border: 1.5px solid var(--gray-200);
-    border-radius: var(--radius);
-    font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--navy);
-    background: var(--white);
-    transition: var(--transition);
-    outline: none;
-  }
-  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-  .form-input::placeholder { color: var(--gray-400); }
-  textarea.form-input { resize: vertical; min-height: 72px; }
-  .error-box {
-    background: var(--danger-bg);
-    color: var(--danger-txt);
-    border: 1px solid #FECACA;
-    border-radius: var(--radius);
-    padding: 10px 14px;
-    font-size: 13px;
-    margin-bottom: 16px;
-    display: none;
-  }
-  .error-box.show { display: block; }
-  .demo-hint {
-    margin-top: 16px;
-    padding: 12px 14px;
-    background: var(--gray-50);
-    border-radius: var(--radius);
-    font-size: 12px;
-    color: var(--gray-500);
-  }
+.main { flex:1; padding:20px; }
 
-  /* ═══════════════════════════════════════════════
-     BUTTONS
-  ═══════════════════════════════════════════════ */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    border: none;
-    border-radius: var(--radius);
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 600;
-    transition: var(--transition);
-    white-space: nowrap;
-  }
-  .btn:active { transform: scale(0.98); }
-  .btn-primary   { background: var(--accent);   color: var(--white); padding: 10px 18px; font-size: 14px; }
-  .btn-primary:hover { background: var(--accent-dark); }
-  .btn-secondary { background: var(--gray-100); color: var(--gray-700); padding: 10px 18px; font-size: 14px; border: 1px solid var(--gray-200); }
-  .btn-secondary:hover { background: var(--gray-200); }
-  .btn-success   { background: var(--success-bg); color: var(--success-txt); padding: 6px 10px; font-size: 12px; }
-  .btn-success:hover { background: #BBF7D0; }
-  .btn-danger    { background: var(--danger-bg);  color: var(--danger-txt);  padding: 6px 10px; font-size: 12px; }
-  .btn-danger:hover { background: #FECACA; }
-  .btn-ai        { background: var(--accent-bg); color: var(--accent);  padding: 6px 10px; font-size: 12px; }
-  .btn-ai:hover  { background: #DBEAFE; }
-  .btn-ghost     { background: transparent; color: var(--gray-400); padding: 6px 10px; font-size: 12px; }
-  .btn-ghost:hover { color: var(--danger); background: var(--danger-bg); }
-  .btn-full      { width: 100%; padding: 12px; font-size: 15px; }
-  .btn-upgrade   {
-    background: linear-gradient(135deg, #F59E0B, #D97706);
-    color: var(--white);
-    padding: 10px 18px;
-    font-size: 14px;
-  }
-  .btn-upgrade:hover { background: linear-gradient(135deg, #D97706, #B45309); }
-  .spinner {
-    width: 16px; height: 16px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: var(--white);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    display: inline-block;
-  }
-  .spinner-accent {
-    border-color: rgba(59,130,246,0.3);
-    border-top-color: var(--accent);
-  }
+.card {
+  background:white; padding:15px; margin-bottom:15px;
+  border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
 
-  /* ═══════════════════════════════════════════════
-     APP LAYOUT
-  ═══════════════════════════════════════════════ */
-  #app-page { display: none; min-height: 100vh; }
-  #app-page.show { display: flex; animation: fadeIn 0.3s ease; }
+input, button {
+  width:100%; padding:10px; margin:5px 0;
+  border-radius:6px; border:1px solid #ccc;
+}
 
-  /* ── SIDEBAR ── */
-  .sidebar {
-    width: 250px;
-    background: var(--navy);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    z-index: 100;
-    overflow: hidden;
-  }
-  .sidebar-logo {
-    padding: 22px 18px;
-    border-bottom: 1px solid var(--navy-light);
-  }
-  .sidebar-logo-text {
-    font-size: 19px;
-    font-weight: 900;
-    color: var(--white);
-    letter-spacing: -0.5px;
-  }
-  .sidebar-logo-text span { color: var(--accent); }
-  .sidebar-tagline { font-size: 11px; color: var(--gray-400); margin-top: 3px; }
-  .sidebar-nav { padding: 14px 10px; flex: 1; overflow-y: auto; }
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 11px 12px;
-    border-radius: var(--radius);
-    cursor: pointer;
-    margin-bottom: 3px;
-    color: var(--gray-400);
-    font-size: 14px;
-    font-weight: 500;
-    font-family: 'DM Sans', sans-serif;
-    background: transparent;
-    border: none;
-    width: 100%;
-    text-align: left;
-    transition: var(--transition);
-  }
-  .nav-item:hover { background: rgba(255,255,255,0.06); color: #CBD5E1; }
-  .nav-item.active { background: var(--navy-light); color: var(--white); font-weight: 700; }
-  .nav-item svg { flex-shrink: 0; opacity: 0.8; }
-  .nav-item.active svg { opacity: 1; }
-  .nav-badge {
-    margin-left: auto;
-    padding: 2px 7px;
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: 700;
-    background: var(--navy-mid);
-    color: var(--gray-400);
-  }
-  .nav-badge.pro { background: #F59E0B; color: var(--white); }
-  .nav-badge.free-tag { background: #374151; color: #9CA3AF; }
-  .sidebar-bottom {
-    padding: 14px 10px;
-    border-top: 1px solid var(--navy-light);
-  }
-  .user-pill {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    background: var(--navy-light);
-    border-radius: var(--radius);
-    margin-bottom: 8px;
-  }
-  .avatar {
-    width: 34px; height: 34px;
-    border-radius: 50%;
-    background: var(--accent);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 800; color: var(--white);
-    flex-shrink: 0;
-  }
-  .user-info { overflow: hidden; flex: 1; }
-  .user-name { font-size: 13px; font-weight: 600; color: var(--white); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .plan-pill {
-    display: inline-block;
-    font-size: 10px;
-    padding: 2px 7px;
-    border-radius: 20px;
-    font-weight: 700;
-    margin-top: 2px;
-    background: #374151;
-    color: #9CA3AF;
-  }
-  .plan-pill.pro { background: #FEF3C7; color: #92400E; }
-  .logout-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    width: 100%;
-    padding: 9px;
-    border-radius: var(--radius);
-    border: none;
-    background: transparent;
-    color: var(--gray-400);
-    font-size: 13px;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    transition: var(--transition);
-  }
-  .logout-btn:hover { background: rgba(255,255,255,0.05); color: #CBD5E1; }
+button { background:#1e3a8a; color:white; border:none; cursor:pointer; }
 
-  /* ── MAIN CONTENT ── */
-  .main-content {
-    margin-left: 250px;
-    flex: 1;
-    padding: 32px;
-    min-height: 100vh;
-  }
-  .page { display: none; animation: fadeInUp 0.3s ease; }
-  .page.active { display: block; }
+.hidden { display:none; }
 
-  /* ═══════════════════════════════════════════════
-     DASHBOARD
-  ═══════════════════════════════════════════════ */
-  .page-header { margin-bottom: 28px; }
-  .page-title { font-size: 26px; font-weight: 800; color: var(--navy); letter-spacing: -0.5px; }
-  .page-sub { font-size: 14px; color: var(--gray-500); margin-top: 4px; }
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  .stat-card {
-    background: var(--white);
-    border-radius: var(--radius-lg);
-    padding: 22px 24px;
-    border: 1px solid var(--gray-200);
-    box-shadow: var(--shadow);
-    transition: var(--transition);
-  }
-  .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
-  .stat-icon { font-size: 22px; margin-bottom: 10px; }
-  .stat-number { font-size: 34px; font-weight: 900; color: var(--navy); line-height: 1; }
-  .stat-label { font-size: 13px; color: var(--gray-500); margin-top: 5px; font-weight: 500; }
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.client { border-bottom:1px solid #eee; padding:10px 0; }
 
-  /* ═══════════════════════════════════════════════
-     CARDS
-  ═══════════════════════════════════════════════ */
-  .card {
-    background: var(--white);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--gray-200);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-  }
-  .card-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--gray-100);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .card-title { font-size: 15px; font-weight: 700; color: var(--navy); }
-  .card-body { padding: 16px 20px; }
-  .mini-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--gray-100);
-  }
-  .mini-row:last-child { border-bottom: none; }
-  .mini-name { font-size: 13px; font-weight: 600; color: var(--navy); }
-  .mini-date { font-size: 11px; color: var(--gray-400); }
-
-  /* ═══════════════════════════════════════════════
-     BADGES
-  ═══════════════════════════════════════════════ */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    padding: 3px 9px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-  .badge-overdue { background: var(--danger-bg); color: var(--danger-txt); }
-  .badge-soon    { background: var(--warning-bg); color: var(--warning-txt); }
-  .badge-ok      { background: var(--success-bg); color: var(--success-txt); }
-  .badge-free    { background: var(--gray-100);   color: var(--gray-500); }
-  .badge-pro     { background: #FEF3C7; color: #92400E; }
-
-  /* ═══════════════════════════════════════════════
-     CLIENT TABLE
-  ═══════════════════════════════════════════════ */
-  .toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-    gap: 12px;
-  }
-  .search-wrap { position: relative; flex: 1; max-width: 300px; }
-  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--gray-400); pointer-events: none; }
-  .search-input {
-    width: 100%;
-    padding: 9px 12px 9px 34px;
-    border: 1.5px solid var(--gray-200);
-    border-radius: var(--radius);
-    font-size: 13px;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--navy);
-    background: var(--white);
-    outline: none;
-    transition: var(--transition);
-  }
-  .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-  table { width: 100%; border-collapse: collapse; }
-  thead tr { background: var(--gray-50); }
-  th {
-    padding: 11px 16px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--gray-500);
-    text-align: left;
-    border-bottom: 1px solid var(--gray-200);
-    white-space: nowrap;
-  }
-  td {
-    padding: 13px 16px;
-    font-size: 13px;
-    color: var(--gray-700);
-    border-bottom: 1px solid var(--gray-100);
-    vertical-align: middle;
-  }
-  tbody tr { transition: background 0.12s; }
-  tbody tr:hover td { background: var(--gray-50); }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr.overdue-row td { background: #FFF8F8; }
-  tbody tr.overdue-row:hover td { background: #FEF2F2; }
-  .client-name { font-weight: 700; color: var(--navy); font-size: 13px; }
-  .client-email { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
-  .notes-cell { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--gray-500); font-size: 12px; }
-  .action-group { display: flex; gap: 5px; flex-wrap: wrap; }
-  .msg-expand-row { background: var(--accent-bg); }
-  .msg-expand-row td { padding: 0 16px 14px; }
-  .ai-msg-box {
-    background: var(--white);
-    border: 1px solid var(--accent-border);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    font-size: 13px;
-    color: var(--navy-mid);
-    line-height: 1.6;
-  }
-  .ai-msg-label { font-size: 10px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 7px; display: flex; align-items: center; gap: 5px; }
-  .msg-actions { margin-top: 10px; display: flex; gap: 8px; }
-
-  /* ═══════════════════════════════════════════════
-     EMPTY STATE
-  ═══════════════════════════════════════════════ */
-  .empty-state { text-align: center; padding: 52px 20px; }
-  .empty-icon { font-size: 44px; margin-bottom: 14px; }
-  .empty-title { font-size: 17px; font-weight: 700; color: var(--navy); margin-bottom: 5px; }
-  .empty-sub { font-size: 13px; color: var(--gray-500); }
-
-  /* ═══════════════════════════════════════════════
-     MODAL / OVERLAY
-  ═══════════════════════════════════════════════ */
-  .overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 500;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    backdrop-filter: blur(3px);
-    animation: fadeIn 0.2s ease;
-  }
-  .overlay.show { display: flex; }
-  .modal {
-    background: var(--white);
-    border-radius: var(--radius-xl);
-    padding: 28px;
-    width: 100%;
-    max-width: 560px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.25);
-    animation: slideIn 0.3s ease;
-  }
-  .modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 22px;
-  }
-  .modal-title { font-size: 18px; font-weight: 800; color: var(--navy); }
-  .modal-close { background: var(--gray-100); border: none; border-radius: var(--radius); width: 30px; height: 30px; cursor: pointer; font-size: 16px; color: var(--gray-500); display: flex; align-items: center; justify-content: center; transition: var(--transition); }
-  .modal-close:hover { background: var(--gray-200); color: var(--gray-700); }
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-
-  /* ═══════════════════════════════════════════════
-     UPGRADE PAGE
-  ═══════════════════════════════════════════════ */
-  .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 540px; margin: 24px 0; }
-  .pricing-card {
-    border-radius: var(--radius-lg);
-    padding: 24px;
-    border: 2px solid var(--gray-200);
-    background: var(--white);
-    transition: var(--transition);
-  }
-  .pricing-card.featured {
-    border-color: var(--accent);
-    background: var(--accent-bg);
-    position: relative;
-  }
-  .featured-tag {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--accent);
-    color: var(--white);
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 12px;
-    border-radius: 20px;
-    white-space: nowrap;
-  }
-  .plan-name { font-size: 15px; font-weight: 800; color: var(--navy); margin-bottom: 4px; }
-  .plan-price { font-size: 26px; font-weight: 900; color: var(--navy); margin-bottom: 16px; }
-  .plan-price span { font-size: 14px; font-weight: 500; color: var(--gray-500); }
-  .plan-feature { display: flex; gap: 8px; font-size: 13px; color: var(--gray-700); margin-bottom: 8px; }
-  .plan-feature .check { color: var(--success); font-weight: 700; flex-shrink: 0; }
-
-  /* ═══════════════════════════════════════════════
-     SETTINGS
-  ═══════════════════════════════════════════════ */
-  .settings-card {
-    background: var(--white);
-    border: 1px solid var(--gray-200);
-    border-radius: var(--radius-lg);
-    padding: 24px;
-    max-width: 480px;
-    box-shadow: var(--shadow);
-  }
-  .settings-avatar {
-    width: 60px; height: 60px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px; font-weight: 900; color: var(--white);
-    margin-bottom: 16px;
-  }
-  .settings-info-row { display: flex; gap: 4px; flex-direction: column; padding: 12px 0; border-bottom: 1px solid var(--gray-100); }
-  .settings-info-row:last-child { border-bottom: none; }
-  .settings-key { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-400); }
-  .settings-val { font-size: 14px; color: var(--navy); font-weight: 600; }
-
- /* ═══════════════════════════════════════════════
-     TOAST
-  ═══════════════════════════════════════════════ */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--navy);
-    color: var(--white);
-    padding: 12px 18px;
-    border-radius: var(--radius);
-    font-size: 13px;
-    font-weight: 600;
-    z-index: 9999;
-    box-shadow: var(--shadow-lg);
-    animation: fadeInUp 0.3s ease;
-    display: none;
-  }
-  .toast.show { display: block; }
-
-  /* ═══════════════════════════════════════════════
-     SCROLLBAR
-  ═══════════════════════════════════════════════ */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
- 
-  /* ═══════════════════════════════════════════════
-     RESPONSIVE
-  ═══════════════════════════════════════════════ */
-  @media (max-width: 768px) {
-    .sidebar { width: 200px; }
-    .main-content { margin-left: 200px; padding: 20px; }
-    .stats-grid { grid-template-columns: 1fr; }
-    .two-col { grid-template-columns: 1fr; }
-    .form-grid { grid-template-columns: 1fr; }
-    .pricing-grid { grid-template-columns: 1fr; }
-  }
+.badge {
+  display:inline-block; padding:5px 10px;
+  background:white; color:#1e3a8a; border-radius:5px;
+}
 </style>
 </head>
+
 <body>
- 
-<!-- ══════════════════════════════════════
-     AUTH PAGE
-══════════════════════════════════════ -->
-<div id="auth-page">
-  <div class="auth-card">
-    <div class="auth-logo">
-      <div class="auth-logo-text">ClientPing<span>AI</span></div>
-      <div class="auth-tagline">Never lose a client again 🚀</div>
-    </div>
 
-    <div class="tab-group">
-      <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Sign In</button>
-      <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
-    </div>
- 
-    <div class="error-box" id="auth-error"></div>
- 
-    <div class="form-group" id="name-group" style="display:none">
-      <label class="form-label">Full Name</label>
-      <input class="form-input" id="auth-name" type="text" placeholder="John Doe">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Email Address</label>
-      <input class="form-input" id="auth-email" type="email" placeholder="you@example.com">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Password</label>
-      <input class="form-input" id="auth-pw" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleAuth()">
-    </div>
-
-    <button class="btn btn-primary btn-full" id="auth-btn" onclick="handleAuth()">Sign In</button>
- 
-    <div class="demo-hint">
-      <b>Demo:</b> Sign up with any email &amp; password, then log in with the same credentials.
-    </div>
-  </div>
-</div>
- 
-<!-- ══════════════════════════════════════
-     MAIN APP
-══════════════════════════════════════ -->
-<div id="app-page">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="sidebar-logo-text">ClientPing<span>AI</span></div>
-      <div class="sidebar-tagline">Never lose a client again 🚀</div>
-    </div>
- 
-    <nav class="sidebar-nav">
-      <button class="nav-item active" id="nav-dashboard" onclick="navigate('dashboard')">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        Dashboard
-      </button>
-      <button class="nav-item" id="nav-clients" onclick="navigate('clients')">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Clients
-        <span class="nav-badge" id="client-count-badge">0</span>
-      </button>
-      <button class="nav-item" id="nav-settings" onclick="navigate('settings')">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M2 12h2M20 12h2"/></svg>
-        Settings
-      </button>
-      <button class="nav-item" id="nav-upgrade" onclick="navigate('upgrade')">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
-        Upgrade Plan
-        <span class="nav-badge free-tag" id="plan-nav-badge">FREE</span>
-      </button>
-    </nav>
-
-    <div class="sidebar-bottom">
-      <div class="user-pill">
-        <div class="avatar" id="user-avatar">U</div>
-        <div class="user-info">
-          <div class="user-name" id="user-display-name">User</div>
-          <div class="plan-pill" id="user-plan-pill">Free</div>
-        </div>
-      </div>
-      <button class="logout-btn" onclick="handleLogout()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Sign Out
-      </button>
-    </div>
-  </aside>
- 
-  <!-- MAIN CONTENT -->
-  <main class="main-content">
- 
-    <!-- ── DASHBOARD PAGE ── -->
-    <div class="page active" id="page-dashboard">
-      <div class="page-header">
-        <div class="page-title" id="welcome-msg">Welcome back 👋</div>
-        <div class="page-sub">Here's your client overview for today</div>
-      </div>
-
-      <div class="stats-grid">
-        <div class="stat-card" style="border-left:4px solid var(--accent)">
-          <div class="stat-icon">👥</div>
-          <div class="stat-number" id="stat-total">0</div>
-          <div class="stat-label">Total Clients</div>
-        </div>
-        <div class="stat-card" style="border-left:4px solid var(--warning)">
-          <div class="stat-icon">⏳</div>
-          <div class="stat-number" id="stat-soon">0</div>
-          <div class="stat-label">Follow-up Soon</div>
-        </div>
-        <div class="stat-card" style="border-left:4px solid var(--danger)">
-          <div class="stat-icon">⚠️</div>
-          <div class="stat-number" id="stat-overdue">0</div>
-          <div class="stat-label">Overdue Clients</div>
-        </div>
-      </div>
- 
-      <div class="two-col">
-        <div class="card">
-          <div class="card-header"><span class="card-title">⚠️ Urgent Clients</span></div>
-          <div class="card-body" id="urgent-list">
-            <div class="empty-state" style="padding:20px">
-              <div style="font-size:24px">🎉</div>
-              <div style="font-size:13px;color:var(--gray-500);margin-top:6px">No overdue clients!</div>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header"><span class="card-title">⏳ Coming Up Soon</span></div>
-          <div class="card-body" id="soon-list">
-            <div class="empty-state" style="padding:20px">
-              <div style="font-size:24px">✅</div>
-              <div style="font-size:13px;color:var(--gray-500);margin-top:6px">No upcoming follow-ups</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
- 
-    <!-- ── CLIENTS PAGE ── -->
-    <div class="page" id="page-clients">
-      <div class="page-header">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-          <div>
-            <div class="page-title">Clients</div>
-            <div class="page-sub" id="clients-sub">0 clients</div>
-          </div>
-          <button class="btn btn-primary" onclick="openAddModal()">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Client
-          </button>
-        </div>
-      </div>
-
-      <div class="toolbar">
-        <div class="search-wrap">
-          <svg class="search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input class="search-input" id="search-input" placeholder="Search clients..." oninput="renderClientsTable()">
-        </div>
-      </div>
- 
-      <div class="card">
-        <div id="clients-table-wrap"></div>
-      </div>
-    </div>
- 
-    <!-- ── SETTINGS PAGE ── -->
-    <div class="page" id="page-settings">
-      <div class="page-header">
-        <div class="page-title">Settings</div>
-        <div class="page-sub">Manage your account preferences</div>
-      </div>
-      <div class="settings-card">
-        <div class="settings-avatar" id="settings-avatar">U</div>
-        <div class="settings-info-row">
-          <div class="settings-key">Full Name</div>
-          <div class="settings-val" id="settings-name">—</div>
-        </div>
-        <div class="settings-info-row">
-          <div class="settings-key">Email Address</div>
-          <div class="settings-val" id="settings-email">—</div>
-        </div>
-        <div class="settings-info-row">
-          <div class="settings-key">Current Plan</div>
-          <div class="settings-val"><span class="badge" id="settings-plan-badge">Free</span></div>
-        </div>
-        <div class="settings-info-row">
-          <div class="settings-key">Member Since</div>
-          <div class="settings-val" id="settings-since">—</div>
-        </div>
-        <div style="margin-top:20px">
-          <button class="btn btn-danger" onclick="handleLogout()">Sign Out of Account</button>
-        </div>
-      </div>
-    </div>
- 
-    <!-- ── UPGRADE PAGE ── -->
-    <div class="page" id="page-upgrade">
-      <div class="page-header">
-        <div class="page-title" id="upgrade-title">Upgrade to Pro ⭐</div>
-        <div class="page-sub" id="upgrade-sub">Unlock unlimited clients and advanced AI features</div>
-      </div>
- 
-      <div id="upgrade-content">
-        <div class="pricing-grid">
-          <div class="pricing-card">
-            <div class="plan-name">Free Plan</div>
-            <div class="plan-price">₹0 <span>/month</span></div>
-            <div class="plan-feature"><span class="check">✓</span> Up to 10 clients</div>
-            <div class="plan-feature"><span class="check">✓</span> Basic AI messages</div>
-            <div class="plan-feature"><span class="check">✓</span> WhatsApp integration</div>
-            <div class="plan-feature"><span class="check">✓</span> Urgency tracking</div>
-          </div>
-          <div class="pricing-card featured">
-            <div class="featured-tag">Most Popular</div>
-            <div class="plan-name" style="color:var(--accent)">Pro Plan</div>
-            <div class="plan-price">₹999 <span>/month</span></div>
-            <div class="plan-feature"><span class="check">✓</span> <b>Unlimited clients</b></div>
-            <div class="plan-feature"><span class="check">✓</span> Advanced AI messages</div>
-            <div class="plan-feature"><span class="check">✓</span> Priority AI generation</div>
-            <div class="plan-feature"><span class="check">✓</span> All Free features</div>
-          </div>
-        </div>
-        <button class="btn btn-upgrade" id="upgrade-action-btn" onclick="handleUpgrade()" style="padding:12px 28px;font-size:15px">
-          ⭐ Upgrade Now — ₹999/month
-        </button>
-        <div style="margin-top:10px;font-size:12px;color:var(--gray-400)">
-          Powered by Razorpay · Test Mode · Cancel anytime
-        </div>
-      </div>
-    </div>
- 
-  </main>
-</div>
-
-<!-- ══════════════════════════════════════
-     ADD CLIENT MODAL
-══════════════════════════════════════ -->
-<div class="overlay" id="add-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Add New Client</div>
-      <button class="modal-close" onclick="closeAddModal()">✕</button>
-    </div>
-    <div class="error-box" id="add-error"></div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">Name *</label>
-        <input class="form-input" id="f-name" placeholder="Rahul Sharma">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Phone (with country code) *</label>
-        <input class="form-input" id="f-phone" placeholder="+91 98765 43210">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Email</label>
-        <input class="form-input" id="f-email" type="email" placeholder="rahul@example.com">
-      </div>
-      <div></div>
-      <div class="form-group">
-        <label class="form-label">Last Contact Date</label>
-        <input class="form-input" id="f-last" type="date">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Follow-up Date</label>
-        <input class="form-input" id="f-followup" type="date">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Notes</label>
-      <textarea class="form-input" id="f-notes" placeholder="Project details, requirements, context..."></textarea>
-    </div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
-      <button class="btn btn-secondary" onclick="closeAddModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveClient()">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add Client
-      </button>
-    </div>
+<!-- AUTH -->
+<div id="authScreen" style="width:100%; padding:50px;">
+  <div class="card" style="max-width:400px; margin:auto;">
+    <h2>ClientPing AI</h2>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="signup()">Signup</button>
+    <button onclick="login()">Login</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     UPGRADE MODAL
-══════════════════════════════════════ -->
-<div class="overlay" id="upgrade-modal">
-  <div class="modal" style="max-width:420px;text-align:center">
-    <div style="font-size:44px;margin-bottom:12px">⭐</div>
-    <div style="font-size:20px;font-weight:800;color:var(--navy);margin-bottom:8px">Upgrade to Pro</div>
-    <div style="font-size:14px;color:var(--gray-500);margin-bottom:24px">Unlock unlimited clients and advanced AI features</div>
-    <button class="btn btn-upgrade btn-full" id="confirm-upgrade-btn" onclick="confirmUpgrade()">
-      Pay ₹999/month via Razorpay
-    </button>
-    <button class="btn btn-secondary" style="width:100%;margin-top:10px" onclick="closeUpgradeModal()">Cancel</button>
-    <div style="margin-top:12px;font-size:11px;color:var(--gray-400)">Razorpay Test Mode · Secure Payment</div>
-  </div>
+<!-- APP -->
+<div id="appScreen" class="hidden" style="display:flex; width:100%;">
+
+<div class="sidebar">
+  <h2>ClientPing AI</h2>
+  <div id="planBadge" class="badge">Free</div>
+
+  <button onclick="showSection('dashboard')">Dashboard</button>
+  <button onclick="showSection('clients')">Clients</button>
+  <button onclick="showSection('add')">Add Client</button>
+  <button onclick="upgradePlan()">Upgrade Pro</button>
+  <button onclick="logout()">Logout</button>
 </div>
- 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
- 
-<!-- ══════════════════════════════════════
-     JAVASCRIPT — FULL APP LOGIC
-══════════════════════════════════════ -->
+
+<div class="main">
+
+<div id="dashboardSection" class="card">
+  <h3>Dashboard</h3>
+  <p>Total Clients: <span id="clientCount">0</span></p>
+  <p>Plan: <span id="currentPlan">Free</span></p>
+</div>
+
+<div id="clientsSection" class="card hidden">
+  <h3>Clients</h3>
+  <div id="clientList"></div>
+</div>
+
+<div id="addSection" class="card hidden">
+  <h3>Add Client</h3>
+  <input id="clientName" placeholder="Name">
+  <input id="clientPhone" placeholder="Phone">
+  <button onclick="addClient()">Add</button>
+</div>
+
+</div>
+</div>
+
 <script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-<script>
-const supabaseUrl = "https://aeprgqutctiiwdmnsyxv.supabase.co";
 
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-  
 const supabase = window.supabase.createClient(
   "https://aeprgqutctiiwdmnsyxv.supabase.co",
-const supabaseKey =  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlcHJncXV0Y3RpaXdkbW5zeXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MzIzOTYsImV4cCI6MjA5MDIwODM5Nn0.6_n1umaY8L8JjrchLvq_tmEW9lGxa4abl5sfAT3Mlvc"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlcHJncXV0Y3RpaXdkbW5zeXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MzIzOTYsImV4cCI6MjA5MDIwODM5Nn0.6_n1umaY8L8JjrchLvq_tmEW9lGxa4abl5sfAT3Mlvc"
 );
 
-// ✅ SIGNUP
-async function signup(email, password) {
-  const { data, error } = await supabaseClient.auth.signUp({
-    email,
-    password
+const OPENAI_API_KEY = "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";
+const RAZORPAY_KEY = "YOUR_RAZORPAY_KEY";
+
+let USER_PLAN = "Free";
+let currentUserId = null;
+
+/* ================= AUTH ================= */
+
+async function signup() {
+  const { error } = await supabase.auth.signUp({
+    email: email.value,
+    password: password.value
   });
-
-  if (error) {
-    alert(error.message);
-  } else {
-    alert("Signup success!");
-  }
+  if (error) alert(error.message);
+  else alert("Signup success");
 }
 
-  if (error) return { error: error.message };
-
-  return { user: data.user };
-}
-
-// ✅ LOGIN
-async function authLogin(email, pw) {
+async function login() {
   const { data, error } = await supabase.auth.signInWithPassword({
-    email: email,
-    password: pw
+    email: email.value,
+    password: password.value
   });
 
-  if (error) return { error: error.message };
+  if (error) return alert(error.message);
 
-  return { user: data.user };
+  currentUserId = data.user.id;
+
+  await loadProfile(currentUserId);
+
+  showApp();
+  loadClients();
 }
 
-// ✅ LOGOUT
-async function authLogout() {
+async function logout() {
   await supabase.auth.signOut();
+  location.reload();
 }
 
-// ✅ UPGRADE PLAN (metadata update)
-async function upgradePlan(userId) {
-  const { data, error } = await supabase.auth.updateUser({
-    data: { plan: "pro" }
-  });
+/* ================= PROFILE ================= */
 
-  return data?.user;
-}
- 
-// ═══════════════════════════════════════════════
-//  CLIENT FUNCTIONS
-// ══════════════════════════════════════════════
-async function getClients(userId) {
-  const { data, error } = await supabase
-    .from('clients')
-    .select('*')
-    .eq('user_id', userId);
+async function loadProfile(userId) {
+  let { data } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .single();
 
-  if (error) {
-    console.error(error);
-    return [];
-  }
+  USER_PLAN = data?.plan || "Free";
 
-  return data.sort((a, b) => urgencyScore(a) - urgencyScore(b));
+  currentUserId = userId;
+
+  document.getElementById("currentPlan").innerText = USER_PLAN;
+  document.getElementById("planBadge").innerText = USER_PLAN;
 }
 
-// ✅ ADD CLIENT
-async function addClient(data) {
-  const user = (await supabase.auth.getUser()).data.user;
+/* ================= UI ================= */
 
-  const { data: result, error } = await supabase
-    .from('clients')
-    .insert([{
-      ...data,
-      user_id: user.id,
-      created: new Date().toISOString()
-    }])
-    .select();
-
-  if (error) {
-    console.error(error);
-    return null;
-  }
-
-  return result[0];
+function showApp() {
+  authScreen.classList.add("hidden");
+  appScreen.classList.remove("hidden");
 }
 
-// ✅ DELETE CLIENT
-async function deleteClient(id, userId) {
-  const { error } = await supabase
-    .from('clients')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', userId);
+function showSection(section) {
+  dashboardSection.classList.add("hidden");
+  clientsSection.classList.add("hidden");
+  addSection.classList.add("hidden");
 
-  if (error) console.error(error);
-}
-
-// 🔥 SAME LOGIC (unchanged)
-function urgencyScore(c) {
-  const diff = daysDiff(c.follow_up_date);
-  if (diff < 0)  return -1000 + diff;
-  if (diff <= 2) return -500 + diff;
-  return diff;
+  if(section==="dashboard") dashboardSection.classList.remove("hidden");
+  if(section==="clients") clientsSection.classList.remove("hidden");
+  if(section==="add") addSection.classList.remove("hidden");
 }
 
-function daysDiff(dateStr) {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const d = new Date(dateStr); d.setHours(0,0,0,0);
-  return Math.round((d - today) / 86400000);
+/* ================= PLAN LIMIT ================= */
+
+function canAddClient(count) {
+  if (USER_PLAN === "Pro") return true;
+  return count < 5;
 }
 
-function getUrgency(dateStr) {
-  const diff = daysDiff(dateStr);
-  if (diff < 0)  return 'overdue';
-  if (diff <= 2) return 'soon';
-  return 'ok';
+/* ================= CLIENTS ================= */
+
+async function getClientCount() {
+  const { count } = await supabase
+    .from("clients")
+    .select("*", { count:"exact", head:true })
+    .eq("user_id", currentUserId);
+
+  clientCount.innerText = count || 0;
+  return count || 0;
 }
 
-// ═══════════════════════════════════════════════
-//  AI MESSAGE GENERATION (Claude API)
-// ═══════════════════════════════════════════════
-const AI_MESSAGES = {}; // clientId -> message
-const AI_LOADING  = {}; // clientId -> bool
- 
-async function generateAIMessage(clientId) {
-  const client = currentClients.find(c => c.id === clientId);
-  if (!client) return;
- 
-  AI_LOADING[clientId] = true;
-  renderClientsTable();
- 
-  const urg = getUrgency(client.follow_up_date);
-  const toneMap = { overdue: 'urgent and professional', soon: 'friendly and timely', ok: 'warm and casual' };
- 
-  const prompt = `Generate a short personalized WhatsApp follow-up message for a client.
-Client Name: ${client.name}
-Last Contact: ${client.last_contact}
-Follow-up Date: ${client.follow_up_date}
-Notes: ${client.notes || 'No specific notes'}
-Tone: ${toneMap[urg]}
- 
-Rules:
-- Under 3 sentences
-- Sound human, not robotic
-- Start with "Hey ${client.name}" or similar
-- End with a clear call to action
-- Output ONLY the message text, nothing else`;
- 
-  try {
-    const res = await fetch('https://aeprgqutctiiwdmnsyxv.supabase.co/functions/v1/generate-message', {
-      method: 'POST',
-      headers: {
-  "Content-Type": "application/json"
-},
-      body: JSON.stringify({
-  name: client.name,
-  daysGap: 10
-})
-    });
-    const data = await res.json();
+async function addClient() {
+  const count = await getClientCount();
 
-    console.log("AI RESPONSE:", data);
-    
-    if (data && data.message) {
-      AI_MESSAGES[clientId] = data.message;
-    } else {
-      AI_MESSAGES[clientId] = "AI failed";
-    }
-
-  } catch (e) {
-    console.error(e);
-    AI_MESSAGES[clientId] = "Error generating message";
-  }
-
-  AI_LOADING[clientId] = false;
-  renderClientsTable();
-}
-
-// ═══════════════════════════════════════════════
-//  APP STATE
-// ═══════════════════════════════════════════════
-let currentUser    = null;
-let currentClients = [];
-const FREE_LIMIT   = 10;
- 
-// ═══════════════════════════════════════════════
-//  AUTH TAB SWITCH
-// ═══════════════════════════════════════════════
-let authMode = 'login';
- 
-function switchTab(mode) {
-  authMode = mode;
-  document.getElementById('tab-login').classList.toggle('active', mode === 'login');
-  document.getElementById('tab-signup').classList.toggle('active', mode === 'signup');
-  document.getElementById('name-group').style.display = mode === 'signup' ? 'block' : 'none';
-  document.getElementById('auth-btn').textContent = mode === 'login' ? 'Sign In' : 'Create Account';
-  showAuthError('');
-}
- 
-function showAuthError(msg) {
-  const el = document.getElementById('auth-error');
-  el.textContent = msg;
-  el.classList.toggle('show', !!msg);
-}
- 
-async function handleAuth() {
-  const email = document.getElementById('auth-email').value.trim();
-  const pw    = document.getElementById('auth-pw').value;
-  const name  = document.getElementById('auth-name')?.value.trim() || '';
- 
-  if (!email || !pw) return showAuthError('Please fill in all fields.');
-  if (authMode === 'signup' && !name) return showAuthError('Please enter your name.');
- 
-  const btn = document.getElementById('auth-btn');
-  btn.innerHTML = '<span class="spinner"></span>';
-  btn.disabled = true;
- 
-  await sleep(500);
- 
-  const result = authMode === 'login'
-    ? authLogin(email, pw)
-    : authSignup(email, pw, name);
- 
-  btn.innerHTML = authMode === 'login' ? 'Sign In' : 'Create Account';
-  btn.disabled = false;
- 
-  if (result.error) return showAuthError(result.error);
-  loadApp(result.user);
-}
- 
-// ═══════════════════════════════════════════════
-//  LOAD APP
-// ═══════════════════════════════════════════════
-function loadApp(user) {
-  currentUser    = user;
-  currentClients = getClients(user.id);
-
-  document.getElementById('auth-page').style.display = 'none';
-  const app = document.getElementById('app-page');
-  app.classList.add('show');
- 
-  // Update sidebar UI
-  const initials = (user.name || user.email)[0].toUpperCase();
-  document.getElementById('user-avatar').textContent       = initials;
-  document.getElementById('settings-avatar').textContent   = initials;
-  document.getElementById('user-display-name').textContent = user.name || user.email;
-  document.getElementById('welcome-msg').textContent       = `Good to see you, ${(user.name||'there').split(' ')[0]} 👋`;
-  document.getElementById('settings-name').textContent     = user.name || '—';
-  document.getElementById('settings-email').textContent    = user.email;
-  document.getElementById('settings-since').textContent    = new Date(user.created).toLocaleDateString('en-IN', { year:'numeric', month:'long', day:'numeric' });
- 
-  updatePlanUI();
-  refreshDashboard();
-  renderClientsTable();
-  navigate('dashboard');
-}
- 
-function updatePlanUI() {
-  const isPro = currentUser.plan === 'pro';
-  const pill  = document.getElementById('user-plan-pill');
-  pill.textContent = isPro ? '⭐ Pro' : 'Free';
-  pill.className   = 'plan-pill ' + (isPro ? 'pro' : '');
- 
-  const planBadge = document.getElementById('plan-nav-badge');
-  planBadge.textContent  = isPro ? 'PRO' : 'FREE';
-  planBadge.className    = 'nav-badge ' + (isPro ? 'pro' : 'free-tag');
- 
-  const settingsBadge = document.getElementById('settings-plan-badge');
-  settingsBadge.textContent = isPro ? '⭐ Pro Plan' : 'Free Plan';
-  settingsBadge.className   = 'badge ' + (isPro ? 'badge-pro' : 'badge-free');
- 
-  // Upgrade page
-  if (isPro) {
-    document.getElementById('upgrade-title').textContent = "You're on Pro ⭐";
-    document.getElementById('upgrade-sub').textContent   = "Enjoy unlimited access to all features.";
-    document.getElementById('upgrade-content').innerHTML = `
-      <div class="card" style="max-width:380px;padding:32px;text-align:center">
-        <div style="font-size:48px;margin-bottom:12px">🎉</div>
-        <div style="font-weight:800;font-size:18px;color:var(--navy)">Pro Plan Active</div>
-        <div style="color:var(--gray-500);margin-top:8px;font-size:14px">Unlimited clients and advanced AI features.</div>
-      </div>`;
-  }
-}
-
-function handleLogout() {
-  authLogout();
-  currentUser = null;
-  currentClients = [];
-  document.getElementById('app-page').classList.remove('show');
-  document.getElementById('auth-page').style.display = 'flex';
-  switchTab('login');
-  document.getElementById('auth-email').value = '';
-  document.getElementById('auth-pw').value = '';
-}
- 
-// ═══════════════════════════════════════════════
-//  NAVIGATION
-// ═══════════════════════════════════════════════
-function navigate(page) {
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  document.getElementById('nav-' + page)?.classList.add('active');
-  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-  document.getElementById('page-' + page)?.classList.add('active');
-}
- 
-// ═══════════════════════════════════════════════
-//  DASHBOARD
-// ═══════════════════════════════════════════════
-function refreshDashboard() {
-  const total   = currentClients.length;
-  const overdue = currentClients.filter(c => getUrgency(c.follow_up_date) === 'overdue');
-  const soon    = currentClients.filter(c => getUrgency(c.follow_up_date) === 'soon');
- 
-  document.getElementById('stat-total').textContent   = total;
-  document.getElementById('stat-overdue').textContent = overdue.length;
-  document.getElementById('stat-soon').textContent    = soon.length;
-  document.getElementById('client-count-badge').textContent = total;
- 
-  const sub = currentUser.plan === 'free'
-    ? `${total} clients · ${FREE_LIMIT - total} slots remaining`
-    : `${total} clients`;
-  document.getElementById('clients-sub').textContent = sub;
- 
-  // Urgent list
-  const urgentEl = document.getElementById('urgent-list');
-  if (overdue.length === 0) {
-    urgentEl.innerHTML = `<div class="empty-state" style="padding:20px"><div style="font-size:24px">🎉</div><div style="font-size:13px;color:var(--gray-500);margin-top:6px">No overdue clients!</div></div>`;
-  } else {
-    urgentEl.innerHTML = overdue.slice(0,6).map(c => `
-      <div class="mini-row">
-        <div class="mini-name">${escHtml(c.name)}</div>
-        <span class="badge badge-overdue">⚠️ Overdue</span>
-      </div>`).join('');
-  }
-
-  // Soon list
-  const soonEl = document.getElementById('soon-list');
-  if (soon.length === 0) {
-    soonEl.innerHTML = `<div class="empty-state" style="padding:20px"><div style="font-size:24px">✅</div><div style="font-size:13px;color:var(--gray-500);margin-top:6px">No upcoming follow-ups</div></div>`;
-  } else {
-    soonEl.innerHTML = soon.slice(0,6).map(c => `
-      <div class="mini-row">
-        <div class="mini-name">${escHtml(c.name)}</div>
-        <div class="mini-date">${c.follow_up_date}</div>
-      </div>`).join('');
-  }
-}
- 
-// ═══════════════════════════════════════════════
-//  CLIENTS TABLE
-// ═══════════════════════════════════════════════
-function renderClientsTable() {
-  const q        = (document.getElementById('search-input')?.value || '').toLowerCase();
-  const filtered = currentClients.filter(c =>
-    c.name.toLowerCase().includes(q) ||
-    (c.email || '').toLowerCase().includes(q) ||
-    (c.phone || '').includes(q)
-  );
-  const wrap = document.getElementById('clients-table-wrap');
- 
-  if (filtered.length === 0) {
-    wrap.innerHTML = `<div class="empty-state">
-      <div class="empty-icon">👥</div>
-      <div class="empty-title">No clients yet</div>
-      <div class="empty-sub">Add your first client to get started</div>
-      <button class="btn btn-primary" style="margin-top:16px" onclick="openAddModal()">+ Add Client</button>
-    </div>`;
+  if (!canAddClient(count)) {
+    alert("Upgrade to Pro to add more clients");
     return;
   }
- 
-  const rows = filtered.map(c => {
-    const urg     = getUrgency(c.follow_up_date);
-    const badgeCls = urg === 'overdue' ? 'badge-overdue' : urg === 'soon' ? 'badge-soon' : 'badge-ok';
-    const badgeTxt = urg === 'overdue' ? '⚠️ Urgent' : urg === 'soon' ? '⏳ Soon' : '✅ OK';
-    const isOverdue = urg === 'overdue';
-    const msg     = AI_MESSAGES[c.id];
-    const loading = AI_LOADING[c.id];
- 
-    return `
-      <tr class="${isOverdue ? 'overdue-row' : ''}">
-        <td>
-          <div class="client-name">${escHtml(c.name)}</div>
-          <div class="client-email">${escHtml(c.email || '')}</div>
-        </td>
-        <td>${escHtml(c.phone)}</td>
-        <td>${c.last_contact}</td>
-        <td>
-          ${c.follow_up_date}<br>
-          <span class="badge ${badgeCls}" style="margin-top:4px">${badgeTxt}</span>
-        </td>
-        <td class="notes-cell" title="${escHtml(c.notes||'')}">
-          ${escHtml(c.notes || '—')}
-        </td>
-        <td>
-          <div class="action-group">
-            <button class="btn btn-ai" onclick="generateAIMessage('${c.id}')" title="Generate AI Message" ${loading?'disabled':''}>
-              ${loading ? '<span class="spinner spinner-accent" style="border-top-color:var(--accent)"></span>' : '🤖 AI'}
-            </button>
-            <button class="btn btn-success" onclick="sendWhatsApp('${c.id}')" title="Send via WhatsApp">
-              <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-              WhatsApp
-            </button>
-            <button class="btn btn-ghost" onclick="confirmDelete('${c.id}')" title="Delete Client">🗑️</button>
-          </div>
-        </td>
-      </tr>
-      ${msg ? `<tr class="msg-expand-row"><td colspan="6">
-        <div class="ai-msg-box">
-          <div class="ai-msg-label">🤖 AI Generated Message</div>
-          <div id="msg-text-${c.id}">${escHtml(msg)}</div>
-          <div class="msg-actions">
-            <button class="btn btn-secondary" style="font-size:12px;padding:5px 12px" onclick="copyMessage('${c.id}')">
-              📋 Copy Message
-            </button>
-            <button class="btn btn-success" onclick="sendWhatsApp('${c.id}')">
-              <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-              Send via WhatsApp
-            </button>
-          </div>
-        </div>
-      </td></tr>` : ''}`;
-  }).join('');
- 
-  wrap.innerHTML = `<table>
-    <thead><tr>
-      <th>Client</th>
-      <th>Phone</th>
-      <th>Last Contact</th>
-      <th>Follow-up</th>
-      <th>Notes</th>
-      <th>Actions</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-  </table>`;
+
+  await supabase.from("clients").insert([{
+    name: clientName.value,
+    phone: clientPhone.value,
+    user_id: currentUserId
+  }]);
+
+  loadClients();
 }
- 
-// ═══════════════════════════════════════════════
-//  CLIENT ACTIONS
-// ═══════════════════════════════════════════════
-async function sendWhatsApp(clientId) {
-  const client = currentClients.find(c => c.id === clientId);
-  if (!client) return;
 
-  const phone = (client.phone || '').replace(/\D/g, '');
+async function loadClients() {
+  const { data } = await supabase
+    .from("clients")
+    .select("*")
+    .eq("user_id", currentUserId);
 
-  let msg = AI_MESSAGES[clientId];
+  const list = document.getElementById("clientList");
+  list.innerHTML = "";
 
-  // 🔥 Agar AI message nahi hai → generate karo
-  if (!msg) {
-    try {
-      const res = await fetch("https://aeprgqutctiiwdmnsyxv.supabase.co/functions/v1/generate-message", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          name: client.name,
-          daysGap: 10
-        })
-      });
+  data.forEach(c => {
+    const div = document.createElement("div");
+    div.className = "client";
 
-      const data = await res.json();
-      msg = data.message;
+    div.innerHTML = `
+      <b>${c.name}</b><br/>
+      ${c.phone}<br/>
+      <button onclick="generateAI('${c.id}','${c.name}')">AI Msg</button>
+      <button onclick="sendWhatsApp('${c.phone}')">WhatsApp</button>
+      <button onclick="deleteClient('${c.id}')">Delete</button>
+      <div id="msg_${c.id}"></div>
+    `;
 
-      // Save for future
-      AI_MESSAGES[clientId] = msg;
+    list.appendChild(div);
+  });
 
-    } catch (e) {
-      console.error(e);
-      msg = `Hey ${client.name}, just following up 😊`;
+  getClientCount();
+}
+
+async function deleteClient(id) {
+  await supabase.from("clients").delete().eq("id", id);
+  loadClients();
+}
+
+/* ================= AI ================= */
+
+async function generateAI(clientId, name) {
+  let msg = "Hello " + name;
+
+  try {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer "+OPENAI_API_KEY
+      },
+      body: JSON.stringify({
+        model:"gpt-4o-mini",
+        messages:[
+          { role:"system", content:"Write short WhatsApp follow-ups" },
+          { role:"user", content:`Message for ${name}` }
+        ]
+      })
+    });
+
+    const data = await res.json();
+    msg = data.choices[0].message.content;
+
+  } catch(e){}
+
+  document.getElementById("msg_"+clientId).innerText = msg;
+
+  await supabase.from("messages").insert([{
+    user_id: currentUserId,
+    client_id: clientId,
+    message: msg
+  }]);
+}
+
+/* ================= WHATSAPP ================= */
+
+function sendWhatsApp(phone) {
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent("Hello from ClientPing AI 👋")}`;
+  window.open(url,"_blank");
+}
+
+/* ================= RAZORPAY ================= */
+
+function upgradePlan() {
+  const options = {
+    key: RAZORPAY_KEY,
+    amount: 49900,
+    currency: "INR",
+    name: "ClientPing AI Pro",
+    handler: async function () {
+
+      await supabase
+        .from("profiles")
+        .update({ plan: "Pro" })
+        .eq("id", currentUserId);
+
+      alert("Upgraded to Pro 🚀");
+      location.reload();
     }
+  };
+
+  new Razorpay(options).open();
+}
+
+/* ================= SESSION ================= */
+
+supabase.auth.onAuthStateChange((event, session)=>{
+  if(session){
+    currentUserId = session.user.id;
+    loadProfile(currentUserId);
+    showApp();
+    loadClients();
   }
+});
 
-  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-}
- 
-function copyMessage(clientId) {
-  const msg = AI_MESSAGES[clientId];
-  if (!msg) return;
-  navigator.clipboard.writeText(msg).then(() => showToast('✅ Message copied to clipboard!'));
-}
- 
-function confirmDelete(clientId) {
-  if (!confirm('Delete this client? This action cannot be undone.')) return;
-  deleteClient(clientId, currentUser.id);
-  delete AI_MESSAGES[clientId];
-  delete AI_LOADING[clientId];
-  currentClients = getClients(currentUser.id);
-  refreshDashboard();
-  renderClientsTable();
-  showToast('🗑️ Client deleted');
-}
-
-// ═══════════════════════════════════════════════
-//  ADD CLIENT MODAL
-// ═══════════════════════════════════════════════
-function openAddModal() {
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('f-name').value     = '';
-  document.getElementById('f-phone').value    = '';
-  document.getElementById('f-email').value    = '';
-  document.getElementById('f-last').value     = today;
-  document.getElementById('f-followup').value = today;
-  document.getElementById('f-notes').value    = '';
-  showAddError('');
-  document.getElementById('add-modal').classList.add('show');
-  setTimeout(() => document.getElementById('f-name').focus(), 100);
-}
- 
-function closeAddModal() {
-  document.getElementById('add-modal').classList.remove('show');
-}
- 
-function showAddError(msg) {
-  const el = document.getElementById('add-error');
-  el.textContent = msg;
-  el.classList.toggle('show', !!msg);
-}
- 
-function saveClient() {
-  const name     = document.getElementById('f-name').value.trim();
-  const phone    = document.getElementById('f-phone').value.trim();
-  const email    = document.getElementById('f-email').value.trim();
-  const last     = document.getElementById('f-last').value;
-  const followup = document.getElementById('f-followup').value;
-  const notes    = document.getElementById('f-notes').value.trim();
- 
-  if (!name)  return showAddError('Client name is required.');
-  if (!phone) return showAddError('Phone number is required.');
- 
-  const limit = currentUser.plan === 'pro' ? Infinity : FREE_LIMIT;
-  if (currentClients.length >= limit) {
-    return showAddError(`Free plan limit: ${FREE_LIMIT} clients. Please upgrade to Pro for unlimited clients.`);
-  }
- 
-  addClient({ name, phone, email, last_contact: last, follow_up_date: followup, notes, user_id: currentUser.id });
-  currentClients = getClients(currentUser.id);
-  closeAddModal();
-  refreshDashboard();
-  renderClientsTable();
-  showToast('✅ Client added successfully!');
-}
- 
-// ═══════════════════════════════════════════════
-//  UPGRADE
-// ═══════════════════════════════════════════════
-function handleUpgrade() {
-  document.getElementById('upgrade-modal').classList.add('show');
-}
-
-function closeUpgradeModal() {
-  document.getElementById('upgrade-modal').classList.remove('show');
-}
- 
-async function confirmUpgrade() {
-  const btn = document.getElementById('confirm-upgrade-btn');
-  btn.innerHTML = '<span class="spinner"></span> Processing payment...';
-  btn.disabled = true;
- 
-  await sleep(1800); // Simulate Razorpay processing
- 
-  const updated = upgradePlan(currentUser.id);
-  currentUser = updated;
- 
-  btn.innerHTML = 'Pay ₹999/month via Razorpay';
-  btn.disabled = false;
-  closeUpgradeModal();
-  updatePlanUI();
-  refreshDashboard();
-  showToast('🎉 Welcome to Pro! Enjoy unlimited clients.');
-}
- 
-// ═══════════════════════════════════════════════
-//  TOAST
-// ═══════════════════════════════════════════════
-let toastTimer;
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
-}
- 
-// ═══════════════════════════════════════════════
-//  UTILS
-// ═══════════════════════════════════════════════
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
- 
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-// ═══════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════
-(function init() {
-  const session = DB.getSession();
-  if (session) {
-    loadApp(session);
-  } else {
-    document.getElementById('auth-page').style.display = 'flex';
-  }
-})();
 </script>
+
 </body>
 </html>
- 

@@ -954,67 +954,118 @@ const DB = {
 // ═══════════════════════════════════════════════
 //  AUTH FUNCTIONS
 // ═══════════════════════════════════════════════
-function authSignup(email, pw, name) {
-  const users = DB.getUsers();
-  if (users.find(u => u.email === email)) return { error: 'Email already registered.' };
-  const user = { id: crypto.randomUUID(), email, pw, name, plan: 'free', created: new Date().toISOString() };
-  users.push(user);
-  DB.saveUsers(users);
-  DB.saveSession(user);
-  return { user };
+const supabase = window.supabase.createClient(
+  "https://aeprgqutctiiwdmnsyxv.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlcHJncXV0Y3RpaXdkbW5zeXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MzIzOTYsImV4cCI6MjA5MDIwODM5Nn0.6_n1umaY8L8JjrchLvq_tmEW9lGxa4abl5sfAT3Mlvc"
+);
+
+// ✅ SIGNUP
+async function authSignup(email, pw, name) {
+  const { data, error } = await supabase.auth.signUp({
+    email: email,
+    password: pw,
+    options: {
+      data: {
+        name: name,
+        plan: "free"
+      }
+    }
+  });
+
+  if (error) return { error: error.message };
+
+  return { user: data.user };
 }
 
-function authLogin(email, pw) {
-  const user = DB.getUsers().find(u => u.email === email && u.pw === pw);
-  if (!user) return { error: 'Invalid email or password.' };
-  DB.saveSession(user);
-  return { user };
+// ✅ LOGIN
+async function authLogin(email, pw) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email,
+    password: pw
+  });
+
+  if (error) return { error: error.message };
+
+  return { user: data.user };
 }
- 
-function authLogout() { DB.saveSession(null); }
- 
-function upgradePlan(userId) {
-  const users = DB.getUsers();
-  const u = users.find(u => u.id === userId);
-  if (u) { u.plan = 'pro'; DB.saveUsers(users); DB.saveSession(u); }
-  return u;
+
+// ✅ LOGOUT
+async function authLogout() {
+  await supabase.auth.signOut();
+}
+
+// ✅ UPGRADE PLAN (metadata update)
+async function upgradePlan(userId) {
+  const { data, error } = await supabase.auth.updateUser({
+    data: { plan: "pro" }
+  });
+
+  return data?.user;
 }
  
 // ═══════════════════════════════════════════════
 //  CLIENT FUNCTIONS
-// ═══════════════════════════════════════════════
-function getClients(userId) {
-  return DB.getClients()
-    .filter(c => c.user_id === userId)
-    .sort((a, b) => urgencyScore(a) - urgencyScore(b));
+// ══════════════════════════════════════════════
+async function getClients(userId) {
+  const { data, error } = await supabase
+    .from('clients')
+    .select('*')
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error(error);
+    return [];
+  }
+
+  return data.sort((a, b) => urgencyScore(a) - urgencyScore(b));
 }
- 
-function addClient(data) {
-  const clients = DB.getClients();
-  const c = { ...data, id: crypto.randomUUID(), created: new Date().toISOString() };
-  clients.push(c);
-  DB.saveClients(clients);
-  return c;
+
+// ✅ ADD CLIENT
+async function addClient(data) {
+  const user = (await supabase.auth.getUser()).data.user;
+
+  const { data: result, error } = await supabase
+    .from('clients')
+    .insert([{
+      ...data,
+      user_id: user.id,
+      created: new Date().toISOString()
+    }])
+    .select();
+
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  return result[0];
 }
- 
-function deleteClient(id, userId) {
-  const clients = DB.getClients().filter(c => !(c.id === id && c.user_id === userId));
-  DB.saveClients(clients);
+
+// ✅ DELETE CLIENT
+async function deleteClient(id, userId) {
+  const { error } = await supabase
+    .from('clients')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId);
+
+  if (error) console.error(error);
 }
- 
+
+// 🔥 SAME LOGIC (unchanged)
 function urgencyScore(c) {
   const diff = daysDiff(c.follow_up_date);
   if (diff < 0)  return -1000 + diff;
   if (diff <= 2) return -500 + diff;
   return diff;
 }
- 
+
 function daysDiff(dateStr) {
   const today = new Date(); today.setHours(0,0,0,0);
   const d = new Date(dateStr); d.setHours(0,0,0,0);
   return Math.round((d - today) / 86400000);
 }
- 
+
 function getUrgency(dateStr) {
   const diff = daysDiff(dateStr);
   if (diff < 0)  return 'overdue';

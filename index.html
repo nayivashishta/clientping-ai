@@ -939,24 +939,16 @@
      JAVASCRIPT — FULL APP LOGIC
 ══════════════════════════════════════ -->
 <script>
-// ═══════════════════════════════════════════════
-//  DATABASE (localStorage — simulates Supabase)
-// ═══════════════════════════════════════════════
-const DB = {
-  getUsers()   { return JSON.parse(localStorage.getItem('cp_users')   || '[]'); },
-  getClients() { return JSON.parse(localStorage.getItem('cp_clients') || '[]'); },
-  getSession() { return JSON.parse(localStorage.getItem('cp_session') || 'null'); },
-  saveUsers(u)   { localStorage.setItem('cp_users',   JSON.stringify(u)); },
-  saveClients(c) { localStorage.setItem('cp_clients', JSON.stringify(c)); },
-  saveSession(s) { localStorage.setItem('cp_session', JSON.stringify(s)); },
-};
- 
-// ═══════════════════════════════════════════════
-//  AUTH FUNCTIONS
-// ═══════════════════════════════════════════════
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+<script>
+const supabaseUrl = "https://aeprgqutctiiwdmnsyxv.supabase.co";
+
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+  
 const supabase = window.supabase.createClient(
   "https://aeprgqutctiiwdmnsyxv.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlcHJncXV0Y3RpaXdkbW5zeXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MzIzOTYsImV4cCI6MjA5MDIwODM5Nn0.6_n1umaY8L8JjrchLvq_tmEW9lGxa4abl5sfAT3Mlvc"
+const supabaseKey =  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFlcHJncXV0Y3RpaXdkbW5zeXh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MzIzOTYsImV4cCI6MjA5MDIwODM5Nn0.6_n1umaY8L8JjrchLvq_tmEW9lGxa4abl5sfAT3Mlvc"
 );
 
 // ✅ SIGNUP

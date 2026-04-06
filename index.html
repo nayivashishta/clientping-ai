@@ -952,17 +952,18 @@ const supabaseKey =  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 );
 
 // ✅ SIGNUP
-async function authSignup(email, pw, name) {
-  const { data, error } = await supabase.auth.signUp({
-    email: email,
-    password: pw,
-    options: {
-      data: {
-        name: name,
-        plan: "free"
-      }
-    }
+async function signup(email, password) {
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password
   });
+
+  if (error) {
+    alert(error.message);
+  } else {
+    alert("Signup success!");
+  }
+}
 
   if (error) return { error: error.message };
 

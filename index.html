@@ -936,6 +936,17 @@ function buildFallback(c){
 // ══════════════════════════════════════════════════
 //  CLIENTS TABLE RENDER
 // ══════════════════════════════════════════════════
+function getTodayFollowUps(clients) {
+  const today = new Date();
+
+  return clients.filter(c => {
+    if (!c.follow_up_date) return false;
+
+    const d = new Date(c.follow_up_date);
+    return d.toDateString() === today.toDateString();
+  });
+}
+  
 function renderTable(){
   const q=(document.getElementById('search-inp')?.value||'').toLowerCase();
   const list=currentClients.filter(c=>
@@ -944,6 +955,7 @@ function renderTable(){
     (c.phone||'').includes(q)
   );
   const wrap=document.getElementById('tbl-wrap');
+  const todayList = getTodayFollowUps(currentClients);
  
   if(list.length===0){
     wrap.innerHTML=`<div class="empty-state">

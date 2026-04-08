@@ -975,6 +975,7 @@ function getFollowUpTone(client) {
 
 function formatDate(d){
   if(!d) return '—';
+  const clean = d.split('T')[0];
   const date=new Date(d);
   return date.toLocaleDateString('en-IN',{
     day:'numeric',

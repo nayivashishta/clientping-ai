@@ -896,14 +896,25 @@ async function generateAIMessage(cid){
     soon:'Follow-up is in 1-2 days — be friendly and proactive.',
     ok:'General check-in — be warm and casual.'
   };
-  const prompt=`Write a short WhatsApp follow-up message.
-Client: ${c.name}
-Last Contact: ${c.last_contact||'not specified'}
-Follow-up Due: ${c.follow_up_date}
-Notes: ${c.notes||'none'}
-Tone: ${toneMap[urg]}
-Rules: 2-3 sentences max. Start with "Hey ${c.name.split(' ')[0]}," — end with a call to action. Output only the message.`;
- 
+  const prompt=`Write a highly natural WhatsApp follow-up message.
+
+Client Name: ${c.name}
+Context: ${c.notes || "project discussion"}
+Last Contact: ${c.last_contact || "unknown"}
+Follow-up Date: ${c.follow_up_date}
+
+Tone Instruction: ${toneMap[urg]}
+
+Guidelines:
+- Sound human, not robotic
+- Keep it short (2-3 lines max)
+- Add slight emotion (friendly / polite / persuasive)
+- End with a clear call to action
+- No placeholders, no explanations
+
+Start with: "Hey ${c.name.split(' ')[0]},"
+Return ONLY the message text.`;
+  
   try {
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',

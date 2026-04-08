@@ -896,12 +896,15 @@ async function generateAIMessage(cid){
     soon:'Follow-up is in 1-2 days — be friendly and proactive.',
     ok:'General check-in — be warm and casual.'
   };
-  const prompt=`Write a highly natural WhatsApp follow-up message.
+  const cleanFollowDate = formatDate(c.follow_up_date);
+const cleanLastDate = formatDate(c.last_contact);
+
+const prompt=`Write a highly natural WhatsApp follow-up message.
 
 Client Name: ${c.name}
 Context: ${c.notes || "project discussion"}
-Last Contact: ${c.last_contact || "unknown"}
-Follow-up Date: ${c.follow_up_date}
+Last Contact: ${cleanLastDate}
+Follow-up Date: ${cleanFollowDate}
 
 Tone Instruction: ${toneMap[urg]}
 

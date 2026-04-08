@@ -911,6 +911,7 @@ Guidelines:
 - Add slight emotion (friendly / polite / persuasive)
 - End with a clear call to action
 - No placeholders, no explanations
+- Use the client's name naturally once or twice
 
 Start with: "Hey ${c.name.split(' ')[0]},"
 Return ONLY the message text.`;
@@ -972,6 +973,16 @@ function getFollowUpTone(client) {
   return "urgent payment reminder";
 }  
 
+function formatDate(d){
+  if(!d) return '—';
+  const date=new Date(d);
+  return date.toLocaleDateString('en-IN',{
+    day:'numeric',
+    month:'short',
+    year:'numeric'
+  });
+}
+
 function renderTable(){
   const q=(document.getElementById('search-inp')?.value||'').toLowerCase();
   const list=currentClients.filter(c=>
@@ -1002,8 +1013,8 @@ function renderTable(){
     <tr class="${urg==='overdue'?'overdue-row':''}">
       <td><div class="c-name">${esc(c.name)}</div><div class="c-email">${esc(c.email||'')}</div></td>
       <td style="font-size:12px">${esc(c.phone)}</td>
-      <td style="font-size:12px">${c.last_contact||'—'}</td>
-      <td style="font-size:12px">${c.follow_up_date||'—'}<br><span class="badge ${bcls}" style="margin-top:4px">${btxt}</span></td>
+      <td style="font-size:12px">${formatDate(c.last_contact)||'—'}</td>
+      <td style="font-size:12px">${formatDate(c.follow_up_date)||'—'}<br><span class="badge ${bcls}" style="margin-top:4px">${btxt}</span></td>
       <td class="notes-cell" title="${esc(c.notes||'')}">${esc(c.notes||'—')}</td>
       <td>
         <div class="act-grp">

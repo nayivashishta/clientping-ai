@@ -1004,7 +1004,15 @@ function renderTable(){
     </td></tr>`:''}`;
   }).join('');
 
-  wrap.innerHTML=`<table><thead><tr>
+  const todayBox = todayList.length ? `
+  <div style="margin-bottom:12px;padding:10px;border-radius:10px;background:#fff3cd">
+    <b>📅 Today's Follow-ups (${todayList.length})</b>
+  </div>
+` : '';
+
+wrap.innerHTML = `
+  ${todayBox}
+  <table><thead><tr>
     <th>Client</th><th>Phone</th><th>Last Contact</th><th>Follow-up</th><th>Notes</th><th>Actions</th>
   </tr></thead><tbody>${rows}</tbody></table>`;
 }

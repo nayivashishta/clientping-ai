@@ -1017,8 +1017,8 @@ function renderTable(){
     <tr class="${urg==='overdue'?'overdue-row':''}">
       <td><div class="c-name">${esc(c.name)}</div><div class="c-email">${esc(c.email||'')}</div></td>
       <td style="font-size:12px">${esc(c.phone)}</td>
-      <td style="font-size:12px">${formatDate(c.last_contact)||'—'}</td>
-      <td style="font-size:12px">${formatDate(c.follow_up_date)||'—'}<br><span class="badge ${bcls}" style="margin-top:4px">${btxt}</span></td>
+      <td style="font-size:12px">${c.last_contact||'—'}</td>
+      <td style="font-size:12px">${c.follow_up_date||'—'}<br><span class="badge ${bcls}" style="margin-top:4px">${btxt}</span></td>
       <td class="notes-cell" title="${esc(c.notes||'')}">${esc(c.notes||'—')}</td>
       <td>
         <div class="act-grp">

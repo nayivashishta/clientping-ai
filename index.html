@@ -946,7 +946,20 @@ function getTodayFollowUps(clients) {
     return d.toDateString() === today.toDateString();
   });
 }
-  
+
+function getFollowUpTone(client) {
+  if (!client.last_contact) return "friendly";
+
+  const lastDate = new Date(client.last_contact);
+  const today = new Date();
+
+  const diffDays = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
+
+  if (diffDays <= 2) return "friendly follow-up";
+  if (diffDays <= 5) return "gentle reminder";
+  return "urgent payment reminder";
+}  
+
 function renderTable(){
   const q=(document.getElementById('search-inp')?.value||'').toLowerCase();
   const list=currentClients.filter(c=>

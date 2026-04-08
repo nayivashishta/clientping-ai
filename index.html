@@ -928,6 +928,7 @@ Return ONLY the message text.`;
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const data=await res.json();
     AI_MSGS[cid]=data.content[0].text.trim();
+    AI_MSGS[cid] = AI_MSGS[cid].replace(/\n/g, ' ');
     showToast('✅ AI message generated!');
   } catch(e) {
     AI_MSGS[cid]=buildFallback(c);

@@ -662,6 +662,10 @@ async function checkFollowUps(){
       const key=`${today}_${c.id}`;
       if(!NOTIFIED.has(key)){
         NOTIFIED.add(key);
+
+        showToast(`📢 Follow-up time for ${c.name}`,'warning');
+        }
+      
         setTimeout(async()=>{
           showToast(`🤖 Auto-generating message for ${c.name}...`,'info');
           await generateAIMessage(c.id,true);
@@ -671,7 +675,9 @@ async function checkFollowUps(){
             const msgData=AI_MSGS[c.id]||{text:buildFallback(c),emotion:detectEmotion(c)};
             if(phone){
               showToast(`${msgData.emotion?.emoji||'📲'} Auto WhatsApp for ${c.name}!`,'success');
+          setTimeout(()=>{
               window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msgData.text)}`,'_blank');
+          }, 1000);
             }
             if(c.email){
               setTimeout(()=>{
@@ -770,7 +776,39 @@ async function loadApp(user){
   setInterval(checkFollowUps,60000);
   showToast('✅ Connected to Supabase!','success');
 }
- 
+
+// ══════════════════════════════════════════════════
+// 🔴 REALTIME CLIENT SYNC
+// ══════════════════════════════════════════════════
+let realtimeChannel;
+
+function setupRealtime() {
+  if (!currentUser) return;
+
+  if (realtimeChannel) {
+    sb.removeChannel(realtimeChannel);
+  }
+
+  realtimeChannel = sb
+    .channel('clients-realtime')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'clients',
+        filter: `user_id=eq.${currentUser.id}`
+      },
+      async () => {
+        console.log('⚡ Real-time update');
+
+        currentClients = await getClients(currentUser.id);
+        renderClients();
+      }
+    )
+    .subscribe();
+}
+  
 // ══════════════════════════════════════════════════
 //  SUPABASE CLIENTS CRUD
 // ══════════════════════════════════════════════════
@@ -1037,11 +1075,20 @@ async function processPayment(){
     document.getElementById('auth-page').classList.add('show');
   }
   hideLoader();
-  sb.auth.onAuthStateChange(async(event,session)=>{
-    if(event==='SIGNED_OUT'){
-      document.getElementById('app-page').classList.remove('show');
-      document.getElementById('auth-page').classList.add('show');
-    }
+  sb.auth.onAuthStateChange(async (event, session) => {
+
+  // ✅ LOGIN / SESSION ACTIVE
+  if (session?.user) {
+    await loadApp(session.user);
+
+    setupRealtime(); // 🔥 ADD THIS
+  }
+
+  // ❌ LOGOUT
+  if (event === 'SIGNED_OUT') {
+    document.getElementById('app-page').classList.remove('show');
+    document.getElementById('auth-page').classList.add('show');
+  }
   });
 })();
 </script>

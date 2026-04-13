@@ -914,7 +914,17 @@ function renderTable(){
         <span class="emotion-tag ${em.cls}" style="margin-top:4px;display:inline-block">${em.emoji} ${em.label}</span></td>
       <td style="font-size:12px">${esc(c.phone)}</td>
       <td style="font-size:12px">${c.last_contact||'—'}</td>
-      <td style="font-size:12px">${c.follow_up_date||'—'}<br><span class="badge ${bcls}" style="margin-top:4px">${btxt}</span></td>
+      <td style="font-size:12px">
+  ${c.follow_up_date 
+    ? new Date(c.follow_up_date).toLocaleString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    : '—'}
+  <br><span class="badge ${bcls}" style="margin-top:4px">${btxt}</span></td>
       <td class="notes-cell" title="${esc(c.notes||'')}">${esc(c.notes||'—')}</td>
       <td><div class="act-grp">
         <button class="btn btn-ai" onclick="generateAIMessage('${c.id}')" ${loading?'disabled':''} style="min-width:90px">

@@ -1068,33 +1068,20 @@ async function processPayment(){
 (async function init(){
   try{
     const {data:{session}}=await sb.auth.getSession();
-    if(session?.user){
-  currentUser = session.user; 
-    }
+    if(session?.user) await loadApp(session.user);
     else document.getElementById('auth-page').classList.add('show');
   } catch(e){
     console.error(e);
     document.getElementById('auth-page').classList.add('show');
   }
   hideLoader();
-  sb.auth.onAuthStateChange(async (event, session) => {
-
-  if (event === 'SIGNED_IN' && session?.user) {
-    await loadApp(session.user);
-
-    // 👇 delay de rahe hain taki currentUser set ho jaye
-    setTimeout(() => {
-      setupRealtime();
-    }, 500);
-  }
-
-  if (event === 'SIGNED_OUT') {
-    document.getElementById('app-page').classList.remove('show');
-    document.getElementById('auth-page').classList.add('show');
-  }
-
-});
+  sb.auth.onAuthStateChange(async(event,session)=>{
+    if(event==='SIGNED_OUT'){
+      document.getElementById('app-page').classList.remove('show');
+      document.getElementById('auth-page').classList.add('show');
+    }
+  });
 })();
 </script>
 </body>
-</html> 
+</html>

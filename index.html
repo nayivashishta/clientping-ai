@@ -428,8 +428,8 @@ tbody tr:last-child td{border-bottom:none}
       <div class="fg"><label class="lbl">Phone (with code) *</label><input class="inp" id="f-phone" placeholder="+91 98765 43210"></div>
       <div class="fg"><label class="lbl">Email</label><input class="inp" id="f-email" type="email" placeholder="rahul@example.com"></div>
       <div></div>
-      <div class="fg"><label class="lbl">Last Contact Date</label><input class="inp" id="f-last" type="date"></div>
-      <div class="fg"><label class="lbl">Follow-up Date</label><input class="inp" id="f-fu" type="date"></div>
+      <div class="fg"><label class="lbl">Last Contact Date</label><input class="inp" id="f-last" type="datetime-local"></div>
+      <div class="fg"><label class="lbl">Follow-up Date</label><input class="inp" id="f-fu" type="datetime-local"></div>
     </div>
     <div class="fg"><label class="lbl">Notes / Context</label>
       <textarea class="inp" id="f-notes" placeholder="Project details, last discussion, mood of client... (helps AI generate better messages)"></textarea>
@@ -633,7 +633,9 @@ function buildFallback(client){
 // ══════════════════════════════════════════════════
 async function checkFollowUps(){
   if(!currentUser||!currentClients.length) return;
-  const today=new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const localISO = new Date(now.getTime() - now.getTimezoneOffset()*60000)
+                  .toISOString().slice(0,16);
   const todayDue=currentClients.filter(c=>c.follow_up_date===today);
   const overdue=currentClients.filter(c=>getUrg(c.follow_up_date)==='overdue');
   const banner=document.getElementById('alert-banner');
@@ -644,7 +646,9 @@ async function checkFollowUps(){
     document.getElementById('alert-title').textContent=`📅 ${todayDue.length} Follow-up(s) Due TODAY!`;
     document.getElementById('alert-msg').style.color='var(--warning-txt)';
     document.getElementById('alert-msg').textContent=`Clients: ${todayDue.map(c=>c.name).join(', ')} — Auto-generating AI messages...`;
- 
+    document.getElementById('f-last').value = localISO;
+    document.getElementById('f-fu').value = localISO;
+    
     for(let i=0;i<todayDue.length;i++){
       const c=todayDue[i];
       const key=`${today}_${c.id}`;

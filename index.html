@@ -746,6 +746,12 @@ async function checkFollowUps(){
   const today = new Date().toISOString().split('T')[0];
   const todayDue = currentClients.filter(c=>c.follow_up_date===today);
   const overdue  = currentClients.filter(c=>getUrg(c.follow_up_date)==='overdue');
+
+    overdueClients.forEach(c => {
+     if(!AI_MSGS[c.id]){   // duplicate avoid
+     generateAIMessage(c.id, true);
+   }
+ });
   const banner   = document.getElementById('alert-banner');
  
   if(todayDue.length>0){

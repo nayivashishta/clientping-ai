@@ -661,7 +661,21 @@ function detectEmotion(client){
   if(score>=2) return {level:'friendly',emoji:'🟡',label:'Friendly',cls:'em-friendly'};
   return            {level:'casual',  emoji:'🟢',label:'Casual',  cls:'em-casual'};
 }
- 
+
+function getClientScore(client){
+  let score = 0;
+
+  const diff = daysDiff(client.follow_up_date);
+
+  if(diff < 0) score += 50;
+  else if(diff <= 2) score += 30;
+
+  if(client.notes?.toLowerCase().includes('payment')) score += 30;
+  if(client.notes?.toLowerCase().includes('important')) score += 20;
+
+  return score;
+}
+  
 let toastTimer;
 function showToast(msg,type='info'){
   const el=document.getElementById('toast');

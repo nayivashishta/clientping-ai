@@ -704,7 +704,12 @@ async function generateAIMessage(cid, autoMode=false){
         'Authorization':`Bearer ${session?.access_token}`,
         'apikey': SUPABASE_KEY,
       },
-      body: JSON.stringify({ client })
+      body: JSON.stringify({
+       clientName: client.name,
+       lastMessage: client.last_message || "",
+       daysGap: daysDiff(client.follow_up_date),
+       type: "followup"
+      recentMessages: client.messages?.slice(-3) || []
     });
  
     if(!res.ok){ const e=await res.json().catch(()=>{}); throw new Error(e?.error||`HTTP ${res.status}`); }
